@@ -184,6 +184,9 @@
             <button onclick="playABCompare()" id="btn-ab-compare" class="hidden px-3.5 py-2.5 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold text-sm">
               🔁 AB连播对比（原声→我的）
             </button>
+            <button onclick="playSimultaneousCompare()" id="btn-sync-compare" class="hidden px-3.5 py-2.5 rounded-xl bg-[#ea580c] text-white font-semibold text-sm shadow-sm">
+              🎧 原声+录音同时播放
+            </button>
           </div>
 
           <div id="echo-status" class="text-sm font-medium text-[var(--primary)] min-h-[1.5rem]"></div>
@@ -563,6 +566,7 @@
 
     let sharedAudioCtx = null;
     let activeBufferSource = null;
+    let activeSyncSources = [];
     let activeUserAudio = null;
     let playbackRaf = null;
     let echoCycleTimer = null;
@@ -584,6 +588,10 @@
       if (activeBufferSource) {
         try { activeBufferSource.onended = null; activeBufferSource.stop(); } catch (e) {}
         activeBufferSource = null;
+      }
+      if (activeSyncSources.length) {
+        activeSyncSources.forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} });
+        activeSyncSources = [];
       }
       try {
         const player = document.getElementById('tts-audio');
@@ -1101,7 +1109,7 @@
       const trimmedLead = usrProf.tStart >= 0.2 ? `（已自动裁掉开口前 ${usrProf.tStart.toFixed(1)}s 停顿）` : '';
       const contDiff = usrProf.continuity - nativeProf.continuity;
       const spanDiff = +(usrProf.semitoneSpan - nativeProf.semitoneSpan).toFixed(1);
-      let tip = '👏 你的连读连贯度与语调起伏非常接近母语者！可点「🔁 AB连播对比」精修细节。';
+      let tip = '👏 你的连读连贯度与语调起伏非常接近母语者！可点「🔁 AB连播」或「🎧 原声+录音同时播放」精修细节。';
       if (contDiff <= -14) {
         tip = '💡 诊断：橙色柱出现了较多断裂空隙（词与词蹦豆子停顿了），试着把虚词弱读滑过去不断气！';
       } else if (spanDiff <= -2.5) {
@@ -1137,8 +1145,14 @@
         ensureNativeProfile(item.raw).then(p => { if (p) renderProsodyCanvas(opts); });
       }
 
-      const mode = opts.mode || 'idle'; // 'idle' | 'native' | 'user' | 'waiting_voice' | 'recording'
+      const mode = opts.mode || 'idle'; // 'idle' | 'native' | 'user' | 'sync' | 'waiting_voice' | 'recording'
       const progress = (typeof opts.progress === 'number') ? Math.max(0, Math.min(1, opts.progress)) : null;
+      const nativeProgress = (typeof opts.nativeProgress === 'number')
+        ? Math.max(0, Math.min(1, opts.nativeProgress))
+        : (mode === 'native' ? progress : null);
+      const userProgress = (typeof opts.userProgress === 'number')
+        ? Math.max(0, Math.min(1, opts.userProgress))
+        : ((mode === 'user' || mode === 'recording') ? progress : null);
       const displayUserProf = mode === 'waiting_voice' ? null : (opts.liveProfile || userProfile);
 
       updateProsodyMetrics(nativeProf, userProfile, mode, opts.waitSec || 0);
@@ -1193,7 +1207,7 @@
           const bh = Math.max(2, e * maxBarH);
           const x = plotLeft + i * slotW + (slotW - barW) / 2;
           const y = plotBottom - bh;
-          const passed = mode === 'native' && progress !== null && (i / (bins - 1)) <= progress;
+          const passed = nativeProgress !== null && (i / (bins - 1)) <= nativeProgress;
           ctx.fillStyle = passed
             ? (dark ? 'rgba(96, 165, 250, 0.48)' : 'rgba(37, 99, 235, 0.40)')
             : (dark ? 'rgba(96, 165, 250, 0.20)' : 'rgba(37, 99, 235, 0.16)');
@@ -1216,7 +1230,7 @@
           const bh = Math.max(2, e * maxBarH);
           const x = plotLeft + i * slotW + (slotW - barW) / 2;
           const y = plotBottom - bh;
-          const passed = (mode === 'user' || mode === 'recording') && progress !== null && (i / (bins - 1)) <= progress;
+          const passed = userProgress !== null && (i / (bins - 1)) <= userProgress;
           ctx.fillStyle = passed
             ? (dark ? 'rgba(251, 146, 60, 0.55)' : 'rgba(234, 88, 12, 0.45)')
             : (dark ? 'rgba(251, 146, 60, 0.30)' : 'rgba(249, 115, 22, 0.26)');
@@ -1241,10 +1255,11 @@
       const beats = item.beats || [];
       if (beats.length > 0) {
         const segW = plotW / beats.length;
-        const activeBeat = (progress !== null && (mode === 'native' || mode === 'user' || mode === 'recording'))
-          ? Math.min(beats.length - 1, Math.floor(progress * beats.length))
+        const beatProg = nativeProgress !== null ? nativeProgress : userProgress;
+        const activeBeat = beatProg !== null
+          ? Math.min(beats.length - 1, Math.floor(beatProg * beats.length))
           : -1;
-        highlightProsodyBeat(mode === 'native' ? activeBeat : -1);
+        highlightProsodyBeat(nativeProgress !== null ? activeBeat : -1);
 
         ctx.font = '600 10.5px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
@@ -1256,7 +1271,7 @@
           const pw = Math.max(12, segW - 4);
           const isAct = idx === activeBeat;
           ctx.fillStyle = isAct
-            ? (mode === 'native'
+            ? (nativeProgress !== null
               ? (dark ? 'rgba(96, 165, 250, 0.28)' : 'rgba(37, 99, 235, 0.16)')
               : (dark ? 'rgba(251, 146, 60, 0.28)' : 'rgba(234, 88, 12, 0.16)'))
             : (dark ? 'rgba(148, 163, 184, 0.10)' : 'rgba(148, 163, 184, 0.12)');
@@ -1266,7 +1281,7 @@
           ctx.fill();
 
           ctx.fillStyle = isAct
-            ? (mode === 'native' ? nativeLine : userLine)
+            ? (nativeProgress !== null ? nativeLine : userLine)
             : labelColor;
           const label = state.blindRevealed ? bText : `♪ 鼓点 ${idx + 1}`;
           ctx.save();
@@ -1278,7 +1293,35 @@
         });
       }
 
-      // 6. Waiting-for-voice parked start indicator OR Animated Playhead Cursor
+      const drawPlayhead = (prog, cursorColor, targetProf) => {
+        const px = plotLeft + prog * plotW;
+        ctx.save();
+        ctx.strokeStyle = cursorColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(px, plotTop);
+        ctx.lineTo(px, plotBottom);
+        ctx.stroke();
+
+        if (targetProf && targetProf.pitch) {
+          const bIdx = Math.min(targetProf.pitch.length - 1, Math.max(0, Math.round(prog * (targetProf.pitch.length - 1))));
+          let pVal = targetProf.pitch[bIdx];
+          if (pVal === null || pVal === undefined) {
+            pVal = 0.2 + (targetProf.env[bIdx] || 0) * 0.45;
+          }
+          const py = (plotTop + 6) + (1 - pVal) * ((plotBottom - plotTop) - 18);
+          ctx.beginPath();
+          ctx.arc(px, py, 5.5, 0, Math.PI * 2);
+          ctx.fillStyle = cursorColor;
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+        }
+        ctx.restore();
+      };
+
+      // 6. Waiting-for-voice parked start indicator OR Animated Playhead Cursor(s)
       if (mode === 'waiting_voice') {
         const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 180);
         const startY = plotTop + plotH * 0.50;
@@ -1308,34 +1351,9 @@
         ctx.fillStyle = userLine;
         ctx.fillText('🎙 开口即从起点起跑...', plotLeft + 12, plotTop + 10);
         ctx.restore();
-      } else if (progress !== null) {
-        const px = plotLeft + progress * plotW;
-        const cursorColor = (mode === 'user' || mode === 'recording') ? userLine : nativeLine;
-        ctx.save();
-        ctx.strokeStyle = cursorColor;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(px, plotTop);
-        ctx.lineTo(px, plotBottom);
-        ctx.stroke();
-
-        const targetProf = (mode === 'user' || mode === 'recording') ? displayUserProf : nativeProf;
-        if (targetProf && targetProf.pitch) {
-          const bIdx = Math.min(targetProf.pitch.length - 1, Math.max(0, Math.round(progress * (targetProf.pitch.length - 1))));
-          let pVal = targetProf.pitch[bIdx];
-          if (pVal === null || pVal === undefined) {
-            pVal = 0.2 + (targetProf.env[bIdx] || 0) * 0.45;
-          }
-          const py = (plotTop + 6) + (1 - pVal) * ((plotBottom - plotTop) - 18);
-          ctx.beginPath();
-          ctx.arc(px, py, 5.5, 0, Math.PI * 2);
-          ctx.fillStyle = cursorColor;
-          ctx.fill();
-          ctx.lineWidth = 2;
-          ctx.strokeStyle = '#ffffff';
-          ctx.stroke();
-        }
-        ctx.restore();
+      } else {
+        if (nativeProgress !== null) drawPlayhead(nativeProgress, nativeLine, nativeProf);
+        if (userProgress !== null) drawPlayhead(userProgress, userLine, displayUserProf);
       }
     }
 
@@ -1367,6 +1385,7 @@
       if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
       document.getElementById('btn-play-rec').classList.add('hidden');
       document.getElementById('btn-ab-compare').classList.add('hidden');
+      document.getElementById('btn-sync-compare').classList.add('hidden');
       document.getElementById('btn-record').textContent = '🎙 开始跟读录音对比';
     }
     function prevEcho() {
@@ -1580,6 +1599,7 @@
       audioUrl = URL.createObjectURL(blob);
       document.getElementById('btn-play-rec').classList.remove('hidden');
       document.getElementById('btn-ab-compare').classList.remove('hidden');
+      document.getElementById('btn-sync-compare').classList.remove('hidden');
       document.getElementById('mic-help-box').classList.add('hidden');
       document.getElementById('echo-status').textContent = msg;
       addXP(1);
@@ -1601,7 +1621,7 @@
       userProfile = decodedProf;
       if (decodedProf) {
         const leadMsg = decodedProf.tStart >= 0.2 ? `（已自动裁掉开口前 ${decodedProf.tStart.toFixed(1)}s 空白停顿）` : '';
-        document.getElementById('echo-status').textContent = `✅ 录音对齐完成${leadMsg}！点击「🔁 AB连播对比」直接听母语原声与你的差距。`;
+        document.getElementById('echo-status').textContent = `✅ 录音对齐完成${leadMsg}！可点「🔁 AB连播对比」或「🎧 原声+录音同时播放」检验节奏贴合度。`;
       }
       renderProsodyCanvas({ mode: 'idle' });
     }
@@ -1688,7 +1708,7 @@
     }
 
     function playABCompare() {
-      if (!audioUrl) return;
+      if (!audioUrl && !userAudioBuffer) return;
       const item = ECHO_DATA[state.echoIdx];
       const cleanRaw = String(item.raw).replace(/\s*\/\s*/g, '. ').trim();
       const status = document.getElementById('echo-status');
@@ -1711,6 +1731,183 @@
           renderProsodyCanvas({ mode: 'native', progress: prog });
         }
       );
+    }
+
+    function calcSegmentGain(audioBuf, startSec, endSec, targetRms, minGain, maxGain) {
+      try {
+        const ch = audioBuf.getChannelData(0);
+        const sr = audioBuf.sampleRate;
+        const i0 = Math.max(0, Math.floor(startSec * sr));
+        const i1 = Math.min(ch.length, Math.ceil(endSec * sr));
+        let sumSq = 0, cnt = 0, peak = 1e-4;
+        const step = Math.max(1, Math.floor((i1 - i0) / 4000));
+        for (let i = i0; i < i1; i += step) {
+          const v = Math.abs(ch[i]);
+          if (v > peak) peak = v;
+          sumSq += v * v;
+          cnt++;
+        }
+        const rms = cnt > 0 ? Math.sqrt(sumSq / cnt) : targetRms;
+        const rawGain = targetRms / Math.max(1e-4, rms);
+        const safePeakGain = 0.85 / peak;
+        return Math.max(minGain, Math.min(maxGain, safePeakGain, rawGain));
+      } catch (e) {
+        return 0.85;
+      }
+    }
+
+    async function playSimultaneousCompare() {
+      if (!audioUrl && !userAudioBuffer) return;
+      stopActivePlayback();
+
+      const item = ECHO_DATA[state.echoIdx];
+      const cleanRaw = String(item.raw).replace(/\s*\/\s*/g, '. ').trim();
+      const status = document.getElementById('echo-status');
+      const badge = document.getElementById('audio-live-badge');
+      const natProf = ECHO_PROFILES[cleanRaw] || null;
+      status.textContent = '🎧 原声+录音同步叠播中：已自动从开口第一声对齐起跑（观察蓝/橙双游标谁快谁慢）...';
+
+      const ctx = ensureLiveAudioCtx();
+      if (ctx && userAudioBuffer) {
+        try {
+          if (ctx.state === 'suspended') await ctx.resume();
+          let nativeBuf = decodedAudioCache[cleanRaw];
+          if (!nativeBuf) {
+            const b64 = (window.__EMBEDDED_AUDIO || {})[cleanRaw];
+            if (b64) {
+              const bin = atob(b64);
+              const bytes = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              nativeBuf = await ctx.decodeAudioData(bytes.buffer.slice(0));
+              decodedAudioCache[cleanRaw] = nativeBuf;
+            }
+          }
+          if (nativeBuf) {
+            const natStart = natProf ? Math.max(0, natProf.tStart - 0.04) : 0;
+            const natEnd = natProf ? Math.min(nativeBuf.duration, natProf.tEnd + 0.08) : nativeBuf.duration;
+            const natDur = Math.max(0.2, natEnd - natStart);
+
+            const usrStart = userProfile ? Math.max(0, userProfile.tStart - 0.04) : 0;
+            const usrEnd = userProfile ? Math.min(userAudioBuffer.duration, userProfile.tEnd + 0.08) : userAudioBuffer.duration;
+            const usrDur = Math.max(0.2, usrEnd - usrStart);
+
+            const natSrc = ctx.createBufferSource();
+            natSrc.buffer = nativeBuf;
+            const natGain = ctx.createGain();
+            natGain.gain.value = calcSegmentGain(nativeBuf, natStart, natEnd, 0.115, 0.45, 1.35);
+
+            const usrSrc = ctx.createBufferSource();
+            usrSrc.buffer = userAudioBuffer;
+            const usrGain = ctx.createGain();
+            usrGain.gain.value = calcSegmentGain(userAudioBuffer, usrStart, usrEnd, 0.125, 0.45, 3.0);
+
+            if (typeof ctx.createStereoPanner === 'function') {
+              const natPan = ctx.createStereoPanner();
+              natPan.pan.value = -0.22;
+              natSrc.connect(natGain);
+              natGain.connect(natPan);
+              natPan.connect(ctx.destination);
+
+              const usrPan = ctx.createStereoPanner();
+              usrPan.pan.value = 0.22;
+              usrSrc.connect(usrGain);
+              usrGain.connect(usrPan);
+              usrPan.connect(ctx.destination);
+            } else {
+              natSrc.connect(natGain);
+              natGain.connect(ctx.destination);
+              usrSrc.connect(usrGain);
+              usrGain.connect(ctx.destination);
+            }
+
+            const syncSession = [natSrc, usrSrc];
+            activeSyncSources = syncSession;
+            if (badge) badge.textContent = '🎧 正在同步叠播：母语原声 + 我的发音...';
+
+            const startAt = ctx.currentTime + 0.02;
+            let endedCount = 0;
+            const onOneEnded = () => {
+              endedCount++;
+              if (endedCount >= 2 && activeSyncSources === syncSession) {
+                if (playbackRaf) { cancelAnimationFrame(playbackRaf); playbackRaf = null; }
+                activeSyncSources = [];
+                highlightProsodyBeat(-1);
+                renderProsodyCanvas({ mode: 'idle' });
+                if (badge) badge.textContent = '🔊 内置真人母语原声已就绪';
+                status.textContent = '✅ 原声+录音同步叠播完成！蓝/橙双游标越重合说明重音节拍越准，掉队处注意压缩弱读虚词。';
+              }
+            };
+            natSrc.onended = onOneEnded;
+            usrSrc.onended = onOneEnded;
+
+            const trackSync = () => {
+              if (activeSyncSources !== syncSession) return;
+              const elapsed = Math.max(0, ctx.currentTime - startAt);
+              const natCur = Math.min(natEnd, natStart + elapsed);
+              const usrCur = Math.min(usrEnd, usrStart + elapsed);
+              const nProg = mapTimeToProfileProgress(natCur, nativeBuf.duration, natProf);
+              const uProg = mapTimeToProfileProgress(usrCur, userAudioBuffer.duration, userProfile);
+              renderProsodyCanvas({ mode: 'sync', nativeProgress: nProg, userProgress: uProg });
+              playbackRaf = requestAnimationFrame(trackSync);
+            };
+
+            natSrc.start(startAt, natStart, natDur);
+            usrSrc.start(startAt, usrStart, usrDur);
+            playbackRaf = requestAnimationFrame(trackSync);
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // Fallback HTML5 dual audio playback
+      const b64 = (window.__EMBEDDED_AUDIO || {})[cleanRaw];
+      const player = document.getElementById('tts-audio');
+      const u = new Audio(audioUrl);
+      activeUserAudio = u;
+      const usrStart = userProfile ? Math.max(0, userProfile.tStart - 0.04) : 0;
+      const usrEndLimit = userProfile ? userProfile.tEnd + 0.10 : Infinity;
+      const natStart = natProf ? Math.max(0, natProf.tStart - 0.04) : 0;
+      if (b64 && player) {
+        player.src = 'data:audio/mpeg;base64,' + b64;
+        player.playbackRate = 1.0;
+        try { player.currentTime = natStart; } catch (e) {}
+      }
+      u.onloadedmetadata = () => {
+        if (usrStart > 0) { try { u.currentTime = usrStart; } catch (e) {} }
+      };
+      let doneA = !b64, doneB = false;
+      const finishBoth = () => {
+        if (doneA && doneB) {
+          if (playbackRaf) { cancelAnimationFrame(playbackRaf); playbackRaf = null; }
+          if (activeUserAudio === u) activeUserAudio = null;
+          highlightProsodyBeat(-1);
+          renderProsodyCanvas({ mode: 'idle' });
+          status.textContent = '✅ 原声+录音同步叠播完成！';
+        }
+      };
+      if (player && b64) player.onended = () => { doneA = true; finishBoth(); };
+      u.onended = () => { doneB = true; finishBoth(); };
+      const trackHtmlSync = () => {
+        if (doneA && doneB) return;
+        if (!doneB && u.currentTime >= usrEndLimit) {
+          u.pause();
+          doneB = true;
+          finishBoth();
+          if (doneA) return;
+        }
+        const nDur = (player && player.duration && isFinite(player.duration)) ? player.duration : (natProf ? natProf.duration : 4.0);
+        const uDur = (u.duration && isFinite(u.duration)) ? u.duration : (userProfile ? userProfile.duration : 4.0);
+        const nProg = player ? mapTimeToProfileProgress(player.currentTime, nDur, natProf) : 1;
+        const uProg = mapTimeToProfileProgress(u.currentTime, uDur, userProfile);
+        renderProsodyCanvas({ mode: 'sync', nativeProgress: nProg, userProgress: uProg });
+        playbackRaf = requestAnimationFrame(trackHtmlSync);
+      };
+      Promise.allSettled([
+        b64 && player ? player.play() : Promise.resolve(),
+        u.play().then(() => { if (usrStart > 0 && u.currentTime < usrStart * 0.5) { try { u.currentTime = usrStart; } catch (e) {} } })
+      ]).then(() => {
+        playbackRaf = requestAnimationFrame(trackHtmlSync);
+      });
     }
 
     window.addEventListener('resize', () => renderProsodyCanvas());
