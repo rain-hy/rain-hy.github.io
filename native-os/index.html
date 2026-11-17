@@ -188,7 +188,27 @@
 
           <div id="echo-status" class="text-sm font-medium text-[var(--primary)] min-h-[1.5rem]"></div>
           <div id="mic-help-box" class="hidden p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] text-sm space-y-2.5"></div>
-          <canvas id="wave-canvas" height="64" class="w-full rounded-xl bg-[var(--background)] border border-[var(--border)] hidden"></canvas>
+
+          <!-- Dynamic Pitch Contour & Linking Energy Dual-Track Oscilloscope -->
+          <div id="prosody-viz-box" class="p-4 rounded-2xl bg-[var(--background)] border border-[var(--border)] space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                <span>📈 音高起伏 (Pitch) &amp; 连读能量流动态示波舱</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-3 text-[var(--muted-foreground)]">
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="inline-block w-3 h-0.5 bg-[#2563eb] dark:bg-[#60a5fa] rounded"></span>
+                  <span>蓝线/柱：母语原声音高与连读流</span>
+                </span>
+                <span id="legend-user-track" class="hidden inline-flex items-center gap-1.5 font-semibold text-[#ea580c]">
+                  <span class="inline-block w-3 h-0.5 bg-[#ea580c] rounded"></span>
+                  <span>橙线/柱：我的跟读音高与连读流</span>
+                </span>
+              </div>
+            </div>
+            <canvas id="wave-canvas" height="156" class="w-full h-[156px] block rounded-xl bg-[var(--card)] border border-[var(--border)]"></canvas>
+            <div id="prosody-metrics" class="text-xs text-[var(--muted-foreground)] leading-relaxed"></div>
+          </div>
         </div>
       </section>
 
@@ -300,7 +320,8 @@
         scene: '职场委婉推进 · Weak Forms & Flap T',
         raw: "I was wondering if you might have a second to walk me through it.",
         zh: '不知你现在方不方便抽一秒钟，带我从头过一遍这个流程？',
-        prosody: `<span class="opacity-55">ə wəz</span> <strong>WON</strong>dəriŋ <span class="opacity-55">ɪf yə</span> <strong>MIGHT</strong> <span class="opacity-55">əv ə</span> <strong>SEC</strong>ənd <span class="opacity-55">tə</span> <strong>WALK</strong> <span class="opacity-55">mi</span> <strong>THROUGH‿ɪt</strong>.`,
+        beats: ['ə wəz WONdəriŋ', 'ɪf yə MIGHT', 'əv ə SECənd', 'tə WALK mi', 'THROUGH‿ɪt'],
+        prosody: `<span data-beat="0" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ə wəz</span> <strong>WON</strong>dəriŋ</span> <span data-beat="1" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ɪf yə</span> <strong>MIGHT</strong></span> <span data-beat="2" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">əv ə</span> <strong>SEC</strong>ənd</span> <span data-beat="3" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">tə</span> <strong>WALK</strong> <span class="opacity-55">mi</span></span> <span data-beat="4" class="echo-beat rounded px-1 transition-colors"><strong>THROUGH‿ɪt</strong>.</span>`,
         trap: '把 I / was / have / a / to 每个词都重读饱满，听起来像审讯机器人。',
         tip: '全句只有 5 个重音鼓点（WON - MIGHT - SEC - WALK - THROUGH）；have a 连成 /əvə/，through it 用 /w/ 滑音无缝连接。'
       },
@@ -308,7 +329,8 @@
         scene: '日常突发回应 · Reduction & Linking',
         raw: "Honestly, it never even crossed my mind that he'd pull it off.",
         zh: '说实话，我压根儿就没想过他居然真能把这事儿办成。',
-        prosody: `<strong>HON</strong>əstli, <span class="opacity-55">ɪt</span> <strong>NEV</strong>ər ivən <strong>CROSSED</strong> <span class="opacity-55">mə</span> <strong>MIND</strong> <span class="opacity-55">ðət hi'd</span> <strong>PULL‿ɪɾ‿OFF</strong>.`,
+        beats: ['HONəstli,', 'ɪt NEVər ivən', 'CROSSED mə MIND', "ðət hi'd", 'PULL‿ɪɾ‿OFF'],
+        prosody: `<span data-beat="0" class="echo-beat rounded px-1 transition-colors"><strong>HON</strong>əstli,</span> <span data-beat="1" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ɪt</span> <strong>NEV</strong>ər ivən</span> <span data-beat="2" class="echo-beat rounded px-1 transition-colors"><strong>CROSSED</strong> <span class="opacity-55">mə</span> <strong>MIND</strong></span> <span data-beat="3" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ðət hi'd</span></span> <span data-beat="4" class="echo-beat rounded px-1 transition-colors"><strong>PULL‿ɪɾ‿OFF</strong>.</span>`,
         trap: 'crossed 的 ed 发成重重的 /t/ 再停顿；pull it off 断开成三个孤立词。',
         tip: 'crossed my 中 /t/ 失去爆破（舌尖抵住上齿龈不吐气直接接 /m/）；pull it off 连成 /pʊlɪɾɔf/（美式闪音 Flap T）。'
       },
@@ -316,7 +338,8 @@
         scene: '自然争取思考时间 · Native Filler Rhythm',
         raw: "Off the top of my head, I'd say we're better off playing it by ear.",
         zh: '凭我脑子里的第一反应，我觉得咱们还是见机行事比较稳妥。',
-        prosody: `<strong>OFF</strong> <span class="opacity-55">ðə</span> <strong>TOP‿əv</strong> <span class="opacity-55">mə</span> <strong>HEAD</strong>, <span class="opacity-55">aɪd</span> <strong>SAY</strong> <span class="opacity-55">wɪr</span> <strong>BEɾər‿OFF</strong> <strong>PLAY</strong>ɪŋ <span class="opacity-55">ɪt baɪ</span> <strong>EAR</strong>.`,
+        beats: ['OFF ðə TOP‿əv', 'mə HEAD,', 'aɪd SAY wɪr', 'BEɾər‿OFF', 'PLAYɪŋ ɪt baɪ EAR'],
+        prosody: `<span data-beat="0" class="echo-beat rounded px-1 transition-colors"><strong>OFF</strong> <span class="opacity-55">ðə</span> <strong>TOP‿əv</strong></span> <span data-beat="1" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">mə</span> <strong>HEAD</strong>,</span> <span data-beat="2" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">aɪd</span> <strong>SAY</strong> <span class="opacity-55">wɪr</span></span> <span data-beat="3" class="echo-beat rounded px-1 transition-colors"><strong>BEɾər‿OFF</strong></span> <span data-beat="4" class="echo-beat rounded px-1 transition-colors"><strong>PLAY</strong>ɪŋ <span class="opacity-55">ɪt baɪ</span> <strong>EAR</strong>.</span>`,
         trap: 'top of 读成 top of（辅元未连）；better 的 tt 硬读成清辅音 /t/。',
         tip: 'top of my 滑成 /tɑpəvmə/；playing it 末尾 it 的 /t/ 吞掉（喉塞停顿），直接弹向 ear。'
       },
@@ -324,7 +347,8 @@
         scene: '温和表达保留意见 · Nuclear Intonation',
         raw: "I see where you're coming from, though I'm not entirely sold on the timeline.",
         zh: '我明白你的出发点，不过我对这个时间排期还是有点保留意见。',
-        prosody: `<span class="opacity-55">aɪ</span> <strong>SEE</strong> <span class="opacity-55">wɛr yər</span> <strong>COM</strong>ɪŋ <span class="opacity-55">frəm</span>, ðoʊ <span class="opacity-55">əm</span> <strong>NOT</strong> <span class="opacity-55">ɪn</span><strong>TIRE</strong>li <strong>SOLD</strong> <span class="opacity-55">ɑn ðə</span> <strong>TIME</strong>laɪn.`,
+        beats: ['aɪ SEE wɛr yər', 'COMɪŋ frəm,', 'ðoʊ əm NOT', 'ɪnTIREli SOLD', 'ɑn ðə TIMElaɪn'],
+        prosody: `<span data-beat="0" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">aɪ</span> <strong>SEE</strong> <span class="opacity-55">wɛr yər</span></span> <span data-beat="1" class="echo-beat rounded px-1 transition-colors"><strong>COM</strong>ɪŋ <span class="opacity-55">frəm</span>,</span> <span data-beat="2" class="echo-beat rounded px-1 transition-colors">ðoʊ <span class="opacity-55">əm</span> <strong>NOT</strong></span> <span data-beat="3" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ɪn</span><strong>TIRE</strong>li <strong>SOLD</strong></span> <span data-beat="4" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ɑn ðə</span> <strong>TIME</strong>laɪn.</span>`,
         trap: 'you are 读成清晰的两拍；语调平直没有“先扬后抑”的礼貌弧度。',
         tip: 'coming from 语调微扬表示共情接纳；SOLD 是全句情绪核，重读拉长后再平稳落下。'
       },
@@ -332,7 +356,8 @@
         scene: '真实社交寒暄 · High-Speed Contraction',
         raw: "What have you been up to lately? Feels like it's been ages!",
         zh: '你最近都在忙活啥呢？感觉真是好久没见了！',
-        prosody: `<strong>WHATCHə</strong> <span class="opacity-55">bɪn</span> <strong>UP</strong> <span class="opacity-55">tə</span> <strong>LATE</strong>li? <strong>FEELS</strong> laɪk <span class="opacity-55">ɪts bɪn</span> <strong>A</strong>dʒəz!`,
+        beats: ['WHATCHə bɪn', 'UP tə LATEli?', 'FEELS laɪk', 'ɪts bɪn Adʒəz!'],
+        prosody: `<span data-beat="0" class="echo-beat rounded px-1 transition-colors"><strong>WHATCHə</strong> <span class="opacity-55">bɪn</span></span> <span data-beat="1" class="echo-beat rounded px-1 transition-colors"><strong>UP</strong> <span class="opacity-55">tə</span> <strong>LATE</strong>li?</span> <span data-beat="2" class="echo-beat rounded px-1 transition-colors"><strong>FEELS</strong> laɪk</span> <span data-beat="3" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ɪts bɪn</span> <strong>A</strong>dʒəz!</span>`,
         trap: 'What have you 一字一顿读成 3 个满拍词，瞬间暴露教科书痕迹。',
         tip: '母语自然语流中 What have you been 直接坍缩为 /ˈwʌtʃə bɪn/，been 弱读成短促的 /bɪn/ 而非长音 /biːn/。'
       },
@@ -340,7 +365,8 @@
         scene: '复盘痛点 · Phrasal Stress Rule',
         raw: "We ended up running out of bandwidth right before the launch.",
         zh: '结果就在正式上线前夕，我们团队的精力和人手彻底耗光了。',
-        prosody: `<span class="opacity-55">wi</span> <strong>END</strong>əd <strong>UP</strong> <strong>RUN</strong>ɪŋ <strong>OUT‿əv</strong> <strong>BAND</strong>wɪdθ <strong>RIGHT</strong> <span class="opacity-55">bɪfɔr ðə</span> <strong>LAUNCH</strong>.`,
+        beats: ['wi ENDəd UP', 'RUNɪŋ OUT‿əv', 'BANDwɪdθ', 'RIGHT bɪfɔr', 'ðə LAUNCH'],
+        prosody: `<span data-beat="0" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">wi</span> <strong>END</strong>əd <strong>UP</strong></span> <span data-beat="1" class="echo-beat rounded px-1 transition-colors"><strong>RUN</strong>ɪŋ <strong>OUT‿əv</strong></span> <span data-beat="2" class="echo-beat rounded px-1 transition-colors"><strong>BAND</strong>wɪdθ</span> <span data-beat="3" class="echo-beat rounded px-1 transition-colors"><strong>RIGHT</strong> <span class="opacity-55">bɪfɔr</span></span> <span data-beat="4" class="echo-beat rounded px-1 transition-colors"><span class="opacity-55">ðə</span> <strong>LAUNCH</strong>.</span>`,
         trap: '短语动词重音放错：母语规则是短语动词的“空间副词（UP / OUT）”往往比动词本身吃更重的重音！',
         tip: 'OUT of 连读为 /aʊɾəv/；right 的 /t/ 失爆停顿蓄力，最后重重砸在 LAUNCH 上。'
       }
@@ -530,76 +556,147 @@
           ? 'tab-btn px-3 py-2.5 rounded-xl text-sm font-bold text-left transition bg-[var(--primary)] text-[var(--primary-foreground)]'
           : 'tab-btn px-3 py-2.5 rounded-xl text-sm font-semibold text-left transition bg-[var(--background)] border border-[var(--border)]';
       });
+      if (tab === 'echo') {
+        requestAnimationFrame(() => renderProsodyCanvas());
+      }
     }
 
     let sharedAudioCtx = null;
     let activeBufferSource = null;
+    let activeUserAudio = null;
+    let playbackRaf = null;
+    let echoCycleTimer = null;
+    const decodedAudioCache = {};
+
+    function ensureLiveAudioCtx() {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      if (!sharedAudioCtx) sharedAudioCtx = new Ctx();
+      if (sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
+    }
+
+    function stopActivePlayback() {
+      if (echoCycleTimer) { clearTimeout(echoCycleTimer); echoCycleTimer = null; }
+      if (playbackRaf) { cancelAnimationFrame(playbackRaf); playbackRaf = null; }
+      if (activeBufferSource) {
+        try { activeBufferSource.onended = null; activeBufferSource.stop(); } catch (e) {}
+        activeBufferSource = null;
+      }
+      try {
+        const player = document.getElementById('tts-audio');
+        if (player && !player.paused) {
+          player.onended = null;
+          player.pause();
+        }
+      } catch (e) {}
+      if (activeUserAudio) {
+        try { activeUserAudio.onended = null; activeUserAudio.pause(); } catch (e) {}
+        activeUserAudio = null;
+      }
+      highlightProsodyBeat(-1);
+    }
 
     function testAudioEngine() {
       speakText("Sound check! Ready to train your native English ears and voice.", 1.0);
     }
 
-    async function speakText(text, rate = 1.0, onEnd = null) {
+    async function speakText(text, rate = 1.0, onEnd = null, onProgress = null) {
       const cleanText = String(text).replace(/\s*\/\s*/g, '. ').trim();
       const badge = document.getElementById('audio-live-badge');
       const setBadge = msg => { if (badge) badge.textContent = msg; };
 
-      if (activeBufferSource) {
-        try { activeBufferSource.stop(); } catch (e) {}
-        activeBufferSource = null;
-      }
+      stopActivePlayback();
 
       const embeddedMap = window.__EMBEDDED_AUDIO || {};
       const b64 = embeddedMap[cleanText];
 
-      if (b64) {
-        try {
-          if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          if (sharedAudioCtx.state === 'suspended') await sharedAudioCtx.resume();
+      const playViaHtmlAudio = async srcUrl => {
+        const player = document.getElementById('tts-audio');
+        player.pause();
+        player.src = srcUrl;
+        player.preservesPitch = true;
+        player.mozPreservesPitch = true;
+        player.webkitPreservesPitch = true;
+        player.playbackRate = rate;
+        const trackProgress = () => {
+          if (player.paused || player.ended) return;
+          if (onProgress && player.duration && isFinite(player.duration)) {
+            onProgress(player.currentTime, player.duration);
+          }
+          playbackRaf = requestAnimationFrame(trackProgress);
+        };
+        player.onended = () => {
+          if (playbackRaf) { cancelAnimationFrame(playbackRaf); playbackRaf = null; }
+          setBadge('🔊 内置真人母语原声已就绪');
+          if (onEnd) onEnd();
+        };
+        setBadge(`🔊 正在播放母语真声 (${rate}x)...`);
+        await player.play();
+        if (onProgress) playbackRaf = requestAnimationFrame(trackProgress);
+      };
+
+      const playViaWebAudio = async () => {
+        const ctx = ensureLiveAudioCtx();
+        if (!ctx) throw new Error('NoAudioCtx');
+        if (ctx.state === 'suspended') await ctx.resume();
+        let audioBuf = decodedAudioCache[cleanText];
+        if (!audioBuf) {
           const bin = atob(b64);
           const bytes = new Uint8Array(bin.length);
           for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-          const audioBuf = await sharedAudioCtx.decodeAudioData(bytes.buffer.slice(0));
-          const src = sharedAudioCtx.createBufferSource();
-          src.buffer = audioBuf;
-          src.playbackRate.value = rate;
-          src.connect(sharedAudioCtx.destination);
-          activeBufferSource = src;
-          setBadge(`🔊 正在播放母语真声 (${rate}x)...`);
-          src.onended = () => {
-            if (activeBufferSource === src) activeBufferSource = null;
-            setBadge('🔊 内置真人母语原声已就绪');
-            if (onEnd) onEnd();
-          };
-          src.start(0);
-          return;
-        } catch (err) {
+          audioBuf = await ctx.decodeAudioData(bytes.buffer.slice(0));
+          decodedAudioCache[cleanText] = audioBuf;
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = audioBuf;
+        src.playbackRate.value = rate;
+        src.connect(ctx.destination);
+        activeBufferSource = src;
+        const startCtxTime = ctx.currentTime;
+        const totalDur = audioBuf.duration;
+        const trackProgress = () => {
+          if (activeBufferSource !== src) return;
+          const elapsed = Math.min(totalDur, Math.max(0, (ctx.currentTime - startCtxTime) * rate));
+          if (onProgress) onProgress(elapsed, totalDur);
+          playbackRaf = requestAnimationFrame(trackProgress);
+        };
+        setBadge(`🔊 正在播放母语真声 (${rate}x)...`);
+        src.onended = () => {
+          if (playbackRaf) { cancelAnimationFrame(playbackRaf); playbackRaf = null; }
+          if (activeBufferSource === src) activeBufferSource = null;
+          setBadge('🔊 内置真人母语原声已就绪');
+          if (onEnd) onEnd();
+        };
+        src.start(0);
+        if (onProgress) playbackRaf = requestAnimationFrame(trackProgress);
+      };
+
+      if (b64) {
+        const preferPitchPreservedHtml = Math.abs(rate - 1.0) > 0.02;
+        if (preferPitchPreservedHtml) {
           try {
-            const player = document.getElementById('tts-audio');
-            player.pause();
-            player.src = 'data:audio/mpeg;base64,' + b64;
-            player.playbackRate = rate;
-            player.onended = () => {
-              setBadge('🔊 内置真人母语原声已就绪');
-              if (onEnd) onEnd();
-            };
-            setBadge(`🔊 正在播放母语真声 (${rate}x)...`);
-            await player.play();
+            await playViaHtmlAudio('data:audio/mpeg;base64,' + b64);
             return;
-          } catch (e2) {}
+          } catch (e1) {
+            try { await playViaWebAudio(); return; } catch (e2) {}
+          }
+        } else {
+          try {
+            await playViaWebAudio();
+            return;
+          } catch (e1) {
+            try { await playViaHtmlAudio('data:audio/mpeg;base64,' + b64); return; } catch (e2) {}
+          }
         }
       }
 
       // Fallback for custom user-entered chunks
       try {
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-          const player = document.getElementById('tts-audio');
-          player.pause();
-          player.src = `/api/tts?text=${encodeURIComponent(cleanText)}&tld=us`;
-          player.playbackRate = rate;
-          player.onended = () => { setBadge('🔊 内置真人母语原声已就绪'); if (onEnd) onEnd(); };
-          setBadge(`🔊 正在播放母语真声 (${rate}x)...`);
-          await player.play();
+          await playViaHtmlAudio(`/api/tts?text=${encodeURIComponent(cleanText)}&tld=us`);
           return;
         }
       } catch (e3) {}
@@ -641,7 +738,509 @@
       renderChecklist();
     }
 
-    // --- Tab 1: Echo Lab & Audio Recorder ---
+    // --- Tab 1: Echo Lab, Acoustic Pitch (F0) & Linking Energy Oscilloscope ---
+    const ECHO_PROFILES = {"I was wondering if you might have a second to walk me through it.":{"duration":4.13,"tStart":0.06,"tEnd":3.19,"semitoneSpan":8.6,"continuity":93,"env":[0.12,0.47,0.66,0.7,0.69,0.71,0.92,0.82,0.43,0.13,0.2,0.38,0.59,0.76,0.78,0.63,0.56,0.56,0.47,0.56,0.73,0.64,0.63,0.59,0.52,0.51,0.64,0.59,0.31,0.08,0.19,0.51,0.71,0.76,0.69,0.61,0.77,0.82,0.75,0.7,0.47,0.33,0.5,0.6,0.61,0.42,0.29,0.49,0.54,0.4,0.12,0.06,0.06,0.07,0.32,0.72,0.81,0.55,0.21,0.14,0.5,0.55,0.45,0.37,0.29,0.2,0.37,0.46,0.41,0.41,0.65,0.85,0.83,0.62,0.32,0.07,0.2,0.42,0.54,0.53,0.5,0.38,0.18,0.05,0.06,0.18,0.5,0.67,0.76,0.75,0.65,0.57,0.5,0.43,0.3,0.13],"pitch":[0.58,0.6,0.62,0.64,0.65,0.65,0.64,0.62,0.6,0.6,0.6,0.63,0.69,0.79,0.88,0.8,0.5,0.33,0.53,0.79,0.78,0.59,0.44,0.37,0.34,0.32,0.32,0.32,0.32,null,0.49,0.47,0.46,0.45,0.48,0.53,0.6,0.69,0.79,0.88,0.92,0.91,0.87,0.8,0.69,0.57,0.47,0.39,0.33,0.3,0.28,null,null,null,0.74,0.78,0.84,0.87,0.8,0.59,0.4,0.27,0.18,0.15,0.17,0.22,0.28,0.28,0.28,0.32,0.4,0.48,0.55,0.62,0.66,null,0.54,0.48,0.39,0.31,0.25,0.22,0.22,null,null,0.44,0.46,0.5,0.54,0.53,0.43,0.28,0.14,0.07,0.06,null]},"Honestly, it never even crossed my mind that he'd pull it off.":{"duration":4.73,"tStart":0.06,"tEnd":3.67,"semitoneSpan":9.2,"continuity":91,"env":[0.14,0.55,0.91,0.97,0.74,0.56,0.56,0.64,0.43,0.16,0.05,0.04,0.21,0.35,0.46,0.48,0.43,0.32,0.23,0.11,0.04,0.17,0.4,0.56,0.45,0.61,0.74,0.81,0.85,0.79,0.4,0.18,0.41,0.46,0.49,0.56,0.67,0.68,0.38,0.35,0.67,0.68,0.66,0.4,0.16,0.16,0.4,0.75,0.81,0.67,0.46,0.13,0.06,0.08,0.28,0.53,0.56,0.52,0.5,0.51,0.6,0.71,0.73,0.68,0.59,0.51,0.44,0.42,0.37,0.23,0.29,0.47,0.4,0.19,0.28,0.58,0.67,0.38,0.16,0.06,0.07,0.28,0.7,0.85,0.81,0.73,0.61,0.44,0.63,0.75,0.74,0.71,0.63,0.53,0.28,0.12],"pitch":[0.76,0.79,0.86,0.91,0.8,0.61,0.66,0.82,0.82,0.76,null,null,0.42,0.38,0.31,0.25,0.22,0.21,0.24,0.33,null,0.55,0.54,0.54,0.56,0.61,0.66,0.76,0.87,0.93,0.89,0.7,0.55,0.7,0.89,0.94,0.93,0.9,0.83,0.74,0.62,0.54,0.5,0.49,0.56,0.68,0.75,0.77,0.79,0.8,0.79,0.77,null,null,0.52,0.44,0.38,0.35,0.34,0.36,0.44,0.52,0.58,0.58,0.5,0.37,0.24,0.19,0.2,0.27,0.33,0.34,0.34,0.39,0.46,0.49,0.49,0.48,0.48,null,null,0.81,0.87,0.91,0.85,0.66,0.45,0.33,0.32,0.36,0.41,0.45,0.38,0.23,0.13,null]},"Off the top of my head, I'd say we're better off playing it by ear.":{"duration":4.81,"tStart":0.06,"tEnd":3.91,"semitoneSpan":10.3,"continuity":84,"env":[0.15,0.57,0.94,0.91,0.61,0.08,0.02,0.11,0.67,0.59,0.11,0.12,0.32,0.66,0.81,0.69,0.14,0.27,0.48,0.22,0.4,0.53,0.58,0.53,0.47,0.4,0.24,0.24,0.37,0.56,0.63,0.55,0.44,0.33,0.19,0.05,0.01,0,0,0.33,0.67,0.69,0.43,0.08,0.05,0.14,0.69,0.81,0.64,0.5,0.81,0.93,0.78,0.35,0.49,0.69,0.7,0.58,0.63,0.67,0.69,0.76,0.74,0.53,0.17,0.03,0.01,0.02,0.06,0.27,0.57,0.73,0.78,0.75,0.65,0.63,0.53,0.35,0.15,0.08,0.23,0.58,0.58,0.44,0.44,0.45,0.51,0.7,0.76,0.68,0.61,0.42,0.38,0.35,0.26,0.16],"pitch":[0.63,0.67,0.77,0.89,0.94,null,null,0.94,0.85,0.74,0.7,0.72,0.74,0.74,0.75,0.78,0.77,0.71,0.6,0.48,0.39,0.31,0.24,0.2,0.19,0.17,0.24,0.41,0.53,0.54,0.45,0.26,0.12,0.06,0.06,null,null,null,null,0.46,0.46,0.48,0.5,null,null,0.9,0.91,0.93,0.94,0.92,0.86,0.76,0.63,0.57,0.58,0.62,0.66,0.67,0.63,0.54,0.42,0.33,0.27,0.24,0.24,null,null,null,null,0.63,0.71,0.81,0.84,0.74,0.55,0.35,0.19,0.1,0.07,null,0.17,0.14,0.11,0.1,0.1,0.14,0.24,0.37,0.45,0.42,0.28,0.13,0.06,0.06,0.06,0.06]},"I see where you're coming from, though I'm not entirely sold on the timeline.":{"duration":5.23,"tStart":0.06,"tEnd":4.34,"semitoneSpan":11,"continuity":91,"env":[0.14,0.6,0.82,0.5,0.08,0.07,0.25,0.59,0.71,0.6,0.5,0.74,0.93,0.95,0.72,0.83,0.79,0.42,0.09,0.19,0.59,0.72,0.7,0.78,0.72,0.56,0.33,0.06,0.17,0.51,0.56,0.48,0.41,0.36,0.28,0.18,0.07,0.01,0.03,0.44,0.86,0.89,0.86,0.77,0.86,0.89,0.85,0.86,0.92,0.77,0.51,0.57,0.8,0.71,0.33,0.17,0.44,0.83,0.94,0.82,0.75,0.66,0.66,0.59,0.31,0.09,0.07,0.28,0.67,0.85,0.9,0.87,0.61,0.54,0.68,0.6,0.52,0.52,0.44,0.17,0.15,0.27,0.65,0.75,0.67,0.72,0.75,0.68,0.6,0.52,0.42,0.38,0.36,0.32,0.23,0.12],"pitch":[0.56,0.59,0.61,0.63,null,null,0.2,0.24,0.27,0.26,0.38,0.7,0.9,0.89,0.79,0.66,0.53,0.44,null,0.6,0.61,0.63,0.62,0.56,0.44,0.33,0.28,null,0.22,0.18,0.13,0.08,0.06,0.06,0.06,0.07,null,null,null,0.47,0.47,0.48,0.5,0.52,0.54,0.59,0.67,0.8,0.91,0.94,0.94,0.91,0.82,0.69,0.64,0.67,0.72,0.8,0.89,0.9,0.77,0.54,0.34,0.24,0.22,null,null,0.69,0.72,0.76,0.74,0.62,0.45,0.32,0.23,0.19,0.17,0.16,0.14,0.17,0.3,0.42,0.47,0.52,0.57,0.57,0.49,0.36,0.22,0.12,0.07,0.06,0.06,0.06,0.06,null]},"What have you been up to lately? Feels like it's been ages!":{"duration":4.18,"tStart":0.08,"tEnd":3.51,"semitoneSpan":11,"continuity":77,"env":[0.14,0.36,0.62,0.87,0.84,0.49,0.54,0.61,0.3,0.27,0.57,0.66,0.67,0.53,0.41,0.85,0.92,0.79,0.66,0.61,0.66,0.6,0.19,0.03,0.02,0.16,0.39,0.59,0.52,0.46,0.64,0.71,0.75,0.68,0.37,0.22,0.34,0.4,0.4,0.37,0.32,0.27,0.16,0.1,0.03,0.01,0,0,0,0,0,0,0,0,0,0.01,0.02,0.04,0.33,0.77,0.88,0.77,0.59,0.32,0.11,0.31,0.67,0.75,0.72,0.52,0.25,0.58,0.73,0.47,0.07,0.09,0.06,0.26,0.66,0.73,0.74,0.73,0.68,0.62,0.69,0.78,0.71,0.51,0.19,0.17,0.31,0.47,0.42,0.32,0.23,0.11],"pitch":[0.47,0.48,0.54,0.63,0.7,0.77,0.83,0.86,0.85,0.82,0.8,0.78,0.76,0.69,0.63,0.58,0.54,0.49,0.45,0.46,0.54,0.64,0.73,null,null,0.45,0.35,0.24,0.17,0.17,0.21,0.3,0.41,0.49,0.46,0.33,0.19,0.1,0.06,0.06,0.06,0.06,0.06,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.78,0.81,0.84,0.86,0.84,0.79,0.71,0.67,0.63,0.59,0.56,0.54,0.53,0.53,0.51,0.48,null,null,null,0.4,0.37,0.34,0.32,0.29,0.3,0.37,0.49,0.6,0.65,0.59,0.43,0.23,0.11,0.07,0.06,0.06,0.06,null]},"We ended up running out of bandwidth right before the launch.":{"duration":3.89,"tStart":0.08,"tEnd":3.39,"semitoneSpan":7.9,"continuity":90,"env":[0.14,0.39,0.63,0.79,0.89,0.95,0.87,0.78,0.72,0.64,0.51,0.37,0.39,0.47,0.49,0.63,0.88,0.96,0.85,0.29,0.05,0.12,0.59,0.77,0.77,0.73,0.73,0.73,0.72,0.72,0.69,0.63,0.67,0.72,0.63,0.54,0.61,0.47,0.24,0.16,0.1,0.33,0.63,0.64,0.62,0.65,0.68,0.63,0.46,0.34,0.48,0.58,0.56,0.36,0.14,0.04,0.05,0.09,0.21,0.57,0.72,0.79,0.71,0.64,0.57,0.28,0.11,0.25,0.46,0.3,0.11,0.07,0.32,0.58,0.57,0.45,0.29,0.39,0.48,0.45,0.44,0.56,0.68,0.78,0.76,0.67,0.46,0.37,0.3,0.14,0.08,0.12,0.18,0.19,0.18,0.14],"pitch":[0.67,0.66,0.67,0.69,0.71,0.73,0.79,0.84,0.72,0.47,0.3,0.28,0.43,0.73,0.9,0.89,0.87,0.9,0.93,0.94,null,0.72,0.67,0.63,0.61,0.6,0.6,0.58,0.55,0.52,0.5,0.49,0.48,0.49,0.51,0.5,0.45,0.37,0.31,0.32,0.41,0.5,0.55,0.6,0.67,0.72,0.73,0.69,0.61,0.49,0.37,0.28,0.23,0.2,0.19,null,null,null,0.49,0.54,0.59,0.64,0.64,0.59,0.51,0.42,0.36,0.32,0.3,0.29,0.29,null,0.4,0.37,0.33,0.29,0.27,0.26,0.23,0.21,0.22,0.26,0.33,0.4,0.42,0.37,0.26,0.16,0.11,0.1,null,null,null,null,null,null]}};
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let audioUrl = null;
+    let animFrame = null;
+    let userProfile = null;
+    let liveMicFrames = [];
+    let activeMicSource = null;
+
+    function detectFrameF0(samples, sampleRate, offset = 0, len = samples.length) {
+      const minLag = Math.max(2, Math.floor(sampleRate / 360));
+      const maxLag = Math.min(len - 2, Math.floor(sampleRate / 78));
+      if (maxLag <= minLag + 2) return null;
+      const corrs = new Float32Array(maxLag + 1);
+      let crossedZero = false;
+      let globalMax = -1;
+      for (let lag = minLag; lag <= maxLag; lag++) {
+        let num = 0, denA = 0, denB = 0;
+        const n = len - lag;
+        for (let i = 0; i < n; i += 2) {
+          const a = samples[offset + i];
+          const b = samples[offset + i + lag];
+          num += a * b;
+          denA += a * a;
+          denB += b * b;
+        }
+        const c = (denA > 1e-9 && denB > 1e-9) ? (2 * num / (denA + denB)) : 0;
+        corrs[lag] = c;
+        if (!crossedZero && c < 0.2) crossedZero = true;
+        if (crossedZero && c > globalMax) globalMax = c;
+      }
+      if (globalMax <= 0.50) return null;
+      const thresh = Math.max(0.48, globalMax * 0.86);
+      let seenDip = false;
+      for (let lag = minLag + 1; lag < maxLag; lag++) {
+        if (corrs[lag] < 0.2) seenDip = true;
+        if (seenDip && corrs[lag] >= thresh && corrs[lag] >= corrs[lag - 1] && corrs[lag] >= corrs[lag + 1]) {
+          return sampleRate / lag;
+        }
+      }
+      return null;
+    }
+
+    function summarizeFramesToProfile(frames, totalDuration, bins = 96) {
+      if (!frames || !frames.length) return null;
+      let maxRms = 1e-5;
+      for (let i = 0; i < frames.length; i++) {
+        if (frames[i].rms > maxRms) maxRms = frames[i].rms;
+      }
+      const silThresh = Math.max(0.004, maxRms * 0.07);
+      let firstIdx = 0, lastIdx = frames.length - 1;
+      while (firstIdx < frames.length - 1 && frames[firstIdx].rms < silThresh) firstIdx++;
+      while (lastIdx > firstIdx && frames[lastIdx].rms < silThresh) lastIdx--;
+      firstIdx = Math.max(0, firstIdx - 1);
+      lastIdx = Math.min(frames.length - 1, lastIdx + 1);
+
+      const rawF0 = frames.map(f => (f.rms >= maxRms * 0.09 ? f.f0 : null));
+      const cleanF0 = rawF0.slice();
+      const voicedF0 = [];
+      for (let fi = firstIdx; fi <= lastIdx; fi++) {
+        const trio = [rawF0[fi - 1], rawF0[fi], rawF0[fi + 1]].filter(x => x != null).sort((a, b) => a - b);
+        if (rawF0[fi] != null && trio.length >= 2) {
+          cleanF0[fi] = trio[Math.floor(trio.length / 2)];
+          voicedF0.push(cleanF0[fi]);
+        } else if (trio.length === 0) {
+          cleanF0[fi] = null;
+        }
+      }
+      voicedF0.sort((a, b) => a - b);
+      const medF0 = voicedF0.length ? voicedF0[Math.floor(voicedF0.length / 2)] : 175;
+      const p10 = voicedF0.length ? voicedF0[Math.floor(voicedF0.length * 0.10)] : medF0;
+      const p90 = voicedF0.length ? voicedF0[Math.floor(voicedF0.length * 0.90)] : medF0;
+      const semitoneSpan = +(Math.max(0.8, 12 * Math.log2(Math.max(1, p90) / Math.max(1, p10)))).toFixed(1);
+
+      const env = new Array(bins).fill(0);
+      const pitch = new Array(bins).fill(null);
+      const span = Math.max(1, lastIdx - firstIdx);
+      for (let b = 0; b < bins; b++) {
+        const fCenter = firstIdx + (b / (bins - 1)) * span;
+        const f0Idx = Math.max(firstIdx, Math.floor(fCenter - 1));
+        const f1Idx = Math.min(lastIdx, Math.ceil(fCenter + 1));
+        let rSum = 0, rCnt = 0, pSum = 0, pCnt = 0;
+        for (let k = f0Idx; k <= f1Idx; k++) {
+          rSum += frames[k].rms; rCnt++;
+          if (cleanF0[k]) {
+            const st = 12 * Math.log2(cleanF0[k] / medF0);
+            if (Math.abs(st) <= 9) { pSum += st; pCnt++; }
+          }
+        }
+        env[b] = +(Math.min(1, Math.pow((rSum / Math.max(1, rCnt)) / maxRms, 0.72))).toFixed(2);
+        if (pCnt > 0) pitch[b] = +(Math.max(0.06, Math.min(0.94, 0.5 + (pSum / pCnt) / 13))).toFixed(2);
+      }
+
+      for (let b = 1; b < bins - 1; b++) {
+        if (pitch[b] === null) {
+          let prev = b - 1; while (prev >= 0 && pitch[prev] === null) prev--;
+          let next = b + 1; while (next < bins && pitch[next] === null) next++;
+          if (prev >= 0 && next < bins && (next - prev) <= 4 && env[b] > 0.10) {
+            const t = (b - prev) / (next - prev);
+            pitch[b] = +(pitch[prev] * (1 - t) + pitch[next] * t).toFixed(2);
+          }
+        }
+      }
+      const smoothPitch = pitch.slice();
+      for (let b = 1; b < bins - 1; b++) {
+        if (pitch[b] !== null && pitch[b - 1] !== null && pitch[b + 1] !== null) {
+          smoothPitch[b] = +(0.25 * pitch[b - 1] + 0.5 * pitch[b] + 0.25 * pitch[b + 1]).toFixed(2);
+        }
+      }
+      const continuity = Math.round((env.filter(v => v >= 0.12).length / bins) * 100);
+      return {
+        duration: +(totalDuration || frames[frames.length - 1].time || 1).toFixed(2),
+        tStart: +(frames[firstIdx].time || 0).toFixed(2),
+        tEnd: +(Math.max((frames[firstIdx].time || 0) + 0.25, frames[lastIdx].time || totalDuration || 1)).toFixed(2),
+        semitoneSpan,
+        continuity,
+        env,
+        pitch: smoothPitch
+      };
+    }
+
+    function analyzePCMBuffer(audioBuf, bins = 96) {
+      const samples = audioBuf.getChannelData(0);
+      const sampleRate = audioBuf.sampleRate;
+      const hop = Math.max(1, Math.floor(sampleRate * 0.015));
+      const win = Math.max(64, Math.floor(sampleRate * 0.038));
+      const frames = [];
+      let maxRms = 1e-5;
+      for (let pos = 0; pos + win <= samples.length; pos += hop) {
+        let sumSq = 0;
+        for (let i = 0; i < win; i++) sumSq += samples[pos + i] * samples[pos + i];
+        const rms = Math.sqrt(sumSq / win);
+        if (rms > maxRms) maxRms = rms;
+        frames.push({ pos, time: (pos + win / 2) / sampleRate, rms, f0: null });
+      }
+      for (let i = 0; i < frames.length; i++) {
+        if (frames[i].rms >= maxRms * 0.09) {
+          frames[i].f0 = detectFrameF0(samples, sampleRate, frames[i].pos, win);
+        }
+      }
+      return summarizeFramesToProfile(frames, audioBuf.duration, bins);
+    }
+
+    async function ensureNativeProfile(rawText) {
+      const clean = String(rawText).replace(/\s*\/\s*/g, '. ').trim();
+      if (ECHO_PROFILES[clean]) return ECHO_PROFILES[clean];
+      const b64 = (window.__EMBEDDED_AUDIO || {})[clean];
+      if (!b64) return null;
+      try {
+        const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const ctx = OfflineCtx ? new OfflineCtx(1, 1, 22050) : ensureLiveAudioCtx();
+        if (!ctx) return null;
+        const audioBuf = await ctx.decodeAudioData(bytes.buffer.slice(0));
+        decodedAudioCache[clean] = audioBuf;
+        const prof = analyzePCMBuffer(audioBuf, 96);
+        if (prof) ECHO_PROFILES[clean] = prof;
+        return prof;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function buildLiveRecordingPreview(frames, targetSpanSec, bins = 96) {
+      const env = new Array(bins).fill(0);
+      const pitch = new Array(bins).fill(null);
+      if (!frames.length) return { duration: targetSpanSec, tStart: 0, tEnd: targetSpanSec, semitoneSpan: 0, continuity: 0, env, pitch };
+      let peakRms = 0.035;
+      const voiced = [];
+      for (let i = 0; i < frames.length; i++) {
+        if (frames[i].rms > peakRms) peakRms = frames[i].rms;
+        if (frames[i].f0 && frames[i].rms > 0.008) voiced.push(frames[i].f0);
+      }
+      voiced.sort((a, b) => a - b);
+      const medF0 = voiced.length ? voiced[Math.floor(voiced.length / 2)] : 175;
+      const effectiveSpan = Math.max(targetSpanSec, frames[frames.length - 1].time + 0.15);
+      for (let i = 0; i < frames.length; i++) {
+        const fr = frames[i];
+        const b = Math.min(bins - 1, Math.max(0, Math.floor((fr.time / effectiveSpan) * bins)));
+        const normE = fr.rms < 0.005 ? 0 : Math.min(1, Math.pow(fr.rms / peakRms, 0.68));
+        if (normE > env[b]) env[b] = +normE.toFixed(2);
+        if (fr.f0 && fr.rms > 0.008) {
+          const st = 12 * Math.log2(fr.f0 / medF0);
+          if (Math.abs(st) <= 9) {
+            pitch[b] = +(Math.max(0.06, Math.min(0.94, 0.5 + st / 13))).toFixed(2);
+          }
+        }
+      }
+      return { duration: effectiveSpan, tStart: 0, tEnd: effectiveSpan, semitoneSpan: 0, continuity: 0, env, pitch };
+    }
+
+    function highlightProsodyBeat(beatIdx) {
+      const nodes = document.querySelectorAll('#echo-prosody .echo-beat');
+      nodes.forEach(el => {
+        const active = state.blindRevealed && Number(el.getAttribute('data-beat')) === beatIdx;
+        if (active) {
+          el.classList.add('bg-[var(--secondary)]', 'ring-1', 'ring-[var(--primary)]');
+        } else {
+          el.classList.remove('bg-[var(--secondary)]', 'ring-1', 'ring-[var(--primary)]');
+        }
+      });
+    }
+
+    function drawPitchCurve(ctx, pitchArr, plotLeft, plotTop, plotW, plotBottom, strokeColor, glowColor, showPeaks, envArr) {
+      const bins = pitchArr.length;
+      const pitchTop = plotTop + 6;
+      const pitchH = (plotBottom - plotTop) - 18;
+      const getXY = i => ({
+        x: plotLeft + (i / Math.max(1, bins - 1)) * plotW,
+        y: pitchTop + (1 - pitchArr[i]) * pitchH
+      });
+
+      const drawPass = (width, color) => {
+        ctx.save();
+        ctx.lineWidth = width;
+        ctx.strokeStyle = color;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        let inSeg = false;
+        let prevPt = null;
+        ctx.beginPath();
+        for (let i = 0; i < bins; i++) {
+          if (pitchArr[i] === null || pitchArr[i] === undefined) {
+            inSeg = false;
+            prevPt = null;
+            continue;
+          }
+          const pt = getXY(i);
+          if (!inSeg) {
+            ctx.moveTo(pt.x, pt.y);
+            inSeg = true;
+          } else {
+            const midX = (prevPt.x + pt.x) / 2;
+            const midY = (prevPt.y + pt.y) / 2;
+            ctx.quadraticCurveTo(prevPt.x, prevPt.y, midX, midY);
+          }
+          prevPt = pt;
+        }
+        if (inSeg && prevPt) ctx.lineTo(prevPt.x, prevPt.y);
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      if (glowColor) drawPass(6.5, glowColor);
+      drawPass(2.7, strokeColor);
+
+      if (showPeaks && envArr) {
+        ctx.save();
+        let lastPeakBin = -10;
+        for (let i = 2; i < bins - 2; i++) {
+          if (pitchArr[i] == null) continue;
+          const e = envArr[i] || 0;
+          if (e >= 0.68 && e >= (envArr[i - 1] || 0) && e >= (envArr[i + 1] || 0) && (i - lastPeakBin) >= 9) {
+            const pt = getXY(i);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 3.8, 0, Math.PI * 2);
+            ctx.fillStyle = strokeColor;
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+            lastPeakBin = i;
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    function updateProsodyMetrics(nativeProf, usrProf, mode) {
+      const box = document.getElementById('prosody-metrics');
+      const userLegend = document.getElementById('legend-user-track');
+      if (!box) return;
+      if (userLegend) userLegend.classList.toggle('hidden', !usrProf && mode !== 'recording');
+
+      if (mode === 'recording') {
+        box.innerHTML = '🔴 <strong>正在实时绘制你的音高起伏与连读能量（橙色）</strong>：请盯着蓝色母语曲线，重音鼓点往上扬、虚词压缩连起来不断气！';
+        return;
+      }
+      if (!nativeProf) {
+        box.textContent = '正在加载本句母语声学特征...';
+        return;
+      }
+      const nDur = (nativeProf.tEnd - nativeProf.tStart).toFixed(1);
+      if (!usrProf) {
+        box.innerHTML = `🎯 <strong>本句母语声学基准</strong>：连读不断流率 <strong>${nativeProf.continuity}%</strong> · 音高起伏跨度 <strong>${nativeProf.semitoneSpan} 半音</strong> · 有效语流 <strong>${nDur}s</strong>（柱体连续不断裂 = 连读滑音；圆点波峰 = 重音鼓点）`;
+        return;
+      }
+      const uDur = Math.max(0.3, usrProf.tEnd - usrProf.tStart).toFixed(1);
+      const contDiff = usrProf.continuity - nativeProf.continuity;
+      const spanDiff = +(usrProf.semitoneSpan - nativeProf.semitoneSpan).toFixed(1);
+      let tip = '👏 你的连读连贯度与语调起伏非常接近母语者！可点「🔁 AB连播对比」精修细节。';
+      if (contDiff <= -14) {
+        tip = '💡 诊断：橙色柱出现了较多断裂空隙（词与词蹦豆子停顿了），试着把虚词弱读滑过去不断气！';
+      } else if (spanDiff <= -2.5) {
+        tip = '💡 诊断：橙色音高曲线偏平直，试着在重音鼓点词上把音高明显“垫高”再自然滑落！';
+      } else if (parseFloat(uDur) > parseFloat(nDur) * 1.32) {
+        tip = '💡 诊断：你的语流耗时偏长，注意压缩虚词（was / have a / to 读成轻短的 /ə/），只保留重音鼓点！';
+      }
+      box.innerHTML = `📊 <strong>双轨声学诊断</strong>：连读不断流率 <strong>母语 ${nativeProf.continuity}% vs 我 ${usrProf.continuity}%</strong> · 音高起伏 <strong>母语 ${nativeProf.semitoneSpan} vs 我 ${usrProf.semitoneSpan} 半音</strong> · 发声时长 <strong>${nDur}s vs ${uDur}s</strong><br/><span>${tip}</span>`;
+    }
+
+    function renderProsodyCanvas(opts = {}) {
+      const canvas = document.getElementById('wave-canvas');
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width < 20 || rect.height < 20) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const W = rect.width;
+      const H = rect.height;
+      if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+
+      const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const item = ECHO_DATA[state.echoIdx];
+      const cleanRaw = String(item.raw).replace(/\s*\/\s*/g, '. ').trim();
+      const nativeProf = ECHO_PROFILES[cleanRaw] || null;
+      if (!nativeProf) {
+        ensureNativeProfile(item.raw).then(p => { if (p) renderProsodyCanvas(opts); });
+      }
+
+      const mode = opts.mode || 'idle'; // 'idle' | 'native' | 'user' | 'recording'
+      const progress = (typeof opts.progress === 'number') ? Math.max(0, Math.min(1, opts.progress)) : null;
+      const displayUserProf = opts.liveProfile || userProfile;
+
+      updateProsodyMetrics(nativeProf, userProfile, mode);
+
+      const plotLeft = 42;
+      const plotRight = W - 12;
+      const plotW = Math.max(40, plotRight - plotLeft);
+      const plotTop = 14;
+      const plotBottom = H - 28;
+      const plotH = plotBottom - plotTop;
+
+      // Y-axis guides & labels
+      const gridColor = dark ? 'rgba(148, 163, 184, 0.16)' : 'rgba(100, 116, 139, 0.16)';
+      const labelColor = dark ? '#94a3b8' : '#64748b';
+      ctx.font = '500 10px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = labelColor;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+
+      const guides = [
+        { y: plotTop + plotH * 0.16, label: '高音↗' },
+        { y: plotTop + plotH * 0.50, label: '中音' },
+        { y: plotBottom - 8, label: '连读流' }
+      ];
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      guides.forEach(g => {
+        ctx.fillText(g.label, plotLeft - 6, g.y);
+        ctx.beginPath();
+        ctx.moveTo(plotLeft, g.y);
+        ctx.lineTo(plotRight, g.y);
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      const nativeLine = dark ? '#60a5fa' : '#2563eb';
+      const nativeGlow = dark ? 'rgba(96, 165, 250, 0.24)' : 'rgba(37, 99, 235, 0.18)';
+      const userLine = dark ? '#fb923c' : '#ea580c';
+      const userGlow = dark ? 'rgba(251, 146, 60, 0.25)' : 'rgba(234, 88, 12, 0.20)';
+
+      // 1. Draw Native Linking Energy Bars
+      if (nativeProf && nativeProf.env) {
+        const bins = nativeProf.env.length;
+        const slotW = plotW / bins;
+        const barW = Math.max(1.8, slotW * 0.76);
+        const maxBarH = plotH * 0.50;
+        for (let i = 0; i < bins; i++) {
+          const e = nativeProf.env[i];
+          if (e <= 0.02) continue;
+          const bh = Math.max(2, e * maxBarH);
+          const x = plotLeft + i * slotW + (slotW - barW) / 2;
+          const y = plotBottom - bh;
+          const passed = mode === 'native' && progress !== null && (i / (bins - 1)) <= progress;
+          ctx.fillStyle = passed
+            ? (dark ? 'rgba(96, 165, 250, 0.48)' : 'rgba(37, 99, 235, 0.40)')
+            : (dark ? 'rgba(96, 165, 250, 0.20)' : 'rgba(37, 99, 235, 0.16)');
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(x, y, barW, bh, 2);
+          else ctx.rect(x, y, barW, bh);
+          ctx.fill();
+        }
+      }
+
+      // 2. Draw User Linking Energy Bars (if recorded or live recording)
+      if (displayUserProf && displayUserProf.env) {
+        const bins = displayUserProf.env.length;
+        const slotW = plotW / bins;
+        const barW = Math.max(1.8, slotW * 0.56);
+        const maxBarH = plotH * 0.48;
+        for (let i = 0; i < bins; i++) {
+          const e = displayUserProf.env[i];
+          if (e <= 0.02) continue;
+          const bh = Math.max(2, e * maxBarH);
+          const x = plotLeft + i * slotW + (slotW - barW) / 2;
+          const y = plotBottom - bh;
+          const passed = (mode === 'user' || mode === 'recording') && progress !== null && (i / (bins - 1)) <= progress;
+          ctx.fillStyle = passed
+            ? (dark ? 'rgba(251, 146, 60, 0.55)' : 'rgba(234, 88, 12, 0.45)')
+            : (dark ? 'rgba(251, 146, 60, 0.30)' : 'rgba(249, 115, 22, 0.26)');
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(x, y, barW, bh, 2);
+          else ctx.rect(x, y, barW, bh);
+          ctx.fill();
+        }
+      }
+
+      // 3. Draw Native Pitch Contour Curve & Stress Peaks
+      if (nativeProf && nativeProf.pitch) {
+        drawPitchCurve(ctx, nativeProf.pitch, plotLeft, plotTop, plotW, plotBottom, nativeLine, nativeGlow, true, nativeProf.env);
+      }
+
+      // 4. Draw User Pitch Contour Curve
+      if (displayUserProf && displayUserProf.pitch) {
+        drawPitchCurve(ctx, displayUserProf.pitch, plotLeft, plotTop, plotW, plotBottom, userLine, userGlow, false, displayUserProf.env);
+      }
+
+      // 5. Draw Bottom Rhythm / Beat Track
+      const beats = item.beats || [];
+      if (beats.length > 0) {
+        const segW = plotW / beats.length;
+        const activeBeat = (progress !== null && (mode === 'native' || mode === 'user' || mode === 'recording'))
+          ? Math.min(beats.length - 1, Math.floor(progress * beats.length))
+          : -1;
+        highlightProsodyBeat(mode === 'native' ? activeBeat : -1);
+
+        ctx.font = '600 10.5px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const pillY = H - 20;
+        const pillH = 16;
+        beats.forEach((bText, idx) => {
+          const x0 = plotLeft + idx * segW + 2;
+          const pw = Math.max(12, segW - 4);
+          const isAct = idx === activeBeat;
+          ctx.fillStyle = isAct
+            ? (mode === 'native'
+              ? (dark ? 'rgba(96, 165, 250, 0.28)' : 'rgba(37, 99, 235, 0.16)')
+              : (dark ? 'rgba(251, 146, 60, 0.28)' : 'rgba(234, 88, 12, 0.16)'))
+            : (dark ? 'rgba(148, 163, 184, 0.10)' : 'rgba(148, 163, 184, 0.12)');
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(x0, pillY, pw, pillH, 5);
+          else ctx.rect(x0, pillY, pw, pillH);
+          ctx.fill();
+
+          ctx.fillStyle = isAct
+            ? (mode === 'native' ? nativeLine : userLine)
+            : labelColor;
+          const label = state.blindRevealed ? bText : `♪ 鼓点 ${idx + 1}`;
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x0 + 2, pillY, pw - 4, pillH);
+          ctx.clip();
+          ctx.fillText(label, x0 + pw / 2, pillY + pillH / 2 + 0.5);
+          ctx.restore();
+        });
+      }
+
+      // 6. Draw Animated Playhead Cursor & Rider Dot
+      if (progress !== null) {
+        const px = plotLeft + progress * plotW;
+        const cursorColor = (mode === 'user' || mode === 'recording') ? userLine : nativeLine;
+        ctx.save();
+        ctx.strokeStyle = cursorColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(px, plotTop);
+        ctx.lineTo(px, plotBottom);
+        ctx.stroke();
+
+        const targetProf = (mode === 'user' || mode === 'recording') ? displayUserProf : nativeProf;
+        if (targetProf && targetProf.pitch) {
+          const bIdx = Math.min(targetProf.pitch.length - 1, Math.max(0, Math.round(progress * (targetProf.pitch.length - 1))));
+          let pVal = targetProf.pitch[bIdx];
+          if (pVal === null || pVal === undefined) {
+            pVal = 0.2 + (targetProf.env[bIdx] || 0) * 0.45;
+          }
+          const py = (plotTop + 6) + (1 - pVal) * ((plotBottom - plotTop) - 18);
+          ctx.beginPath();
+          ctx.arc(px, py, 5.5, 0, Math.PI * 2);
+          ctx.fillStyle = cursorColor;
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
     function renderEcho() {
       const item = ECHO_DATA[state.echoIdx];
       document.getElementById('echo-index').textContent = `${state.echoIdx + 1} / ${ECHO_DATA.length}`;
@@ -657,37 +1256,63 @@
         ? '🙈 重新遮蔽文本（回到纯声音盲听）'
         : '👁 揭晓文本与音变解剖（建议盲听3遍后再点）';
       document.getElementById('echo-status').textContent = '';
+      renderProsodyCanvas();
     }
     function toggleBlindReveal() {
       state.blindRevealed = !state.blindRevealed;
       renderEcho();
     }
+    function resetSentenceRecording() {
+      stopActivePlayback();
+      userProfile = null;
+      if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
+      document.getElementById('btn-play-rec').classList.add('hidden');
+      document.getElementById('btn-ab-compare').classList.add('hidden');
+      document.getElementById('btn-record').textContent = '🎙 开始跟读录音对比';
+    }
     function prevEcho() {
+      resetSentenceRecording();
       state.echoIdx = (state.echoIdx - 1 + ECHO_DATA.length) % ECHO_DATA.length;
       state.blindRevealed = false;
       renderEcho();
     }
     function nextEcho() {
+      resetSentenceRecording();
       state.echoIdx = (state.echoIdx + 1) % ECHO_DATA.length;
       state.blindRevealed = false;
       renderEcho();
     }
-    function runEchoCycle(rate) {
-      const status = document.getElementById('echo-status');
-      status.textContent = '👂 第1步：竖起耳朵盲听母语重音与弱读滑音...';
-      speakText(ECHO_DATA[state.echoIdx].raw, rate, () => {
-        status.textContent = '🧠 第2步：停顿 1 秒——让刚才的声音旋律在脑海里原样回响...';
-        setTimeout(() => {
-          status.textContent = '🗣 第3步：现在开口！像回声一样复刻它的音高起伏与连读（可点击录音对比）';
-          addXP(1);
-        }, 1100);
-      });
+    function mapTimeToProfileProgress(curSec, totalDur, prof) {
+      if (prof && prof.tEnd > prof.tStart + 0.1) {
+        return Math.max(0, Math.min(1, (curSec - prof.tStart) / (prof.tEnd - prof.tStart)));
+      }
+      return totalDur > 0 ? Math.max(0, Math.min(1, curSec / totalDur)) : 0;
     }
-
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let audioUrl = null;
-    let animFrame = null;
+    function runEchoCycle(rate) {
+      const item = ECHO_DATA[state.echoIdx];
+      const cleanRaw = String(item.raw).replace(/\s*\/\s*/g, '. ').trim();
+      const status = document.getElementById('echo-status');
+      status.textContent = '👂 第1步：竖起耳朵盲听母语重音与弱读滑音（观察下方音高起伏与连读能量流）...';
+      speakText(
+        item.raw,
+        rate,
+        () => {
+          renderProsodyCanvas({ mode: 'native', progress: 1 });
+          highlightProsodyBeat(-1);
+          status.textContent = '🧠 第2步：停顿 1 秒——让刚才的音高旋律在脑海里原样回响...';
+          echoCycleTimer = setTimeout(() => {
+            renderProsodyCanvas({ mode: 'idle' });
+            status.textContent = '🗣 第3步：现在开口！像回声一样复刻它的音高起伏与连读（点击「🎙 开始跟读录音对比」实时叠加你的曲线）';
+            addXP(1);
+          }, 1100);
+        },
+        (curSec, totalDur) => {
+          const prof = ECHO_PROFILES[cleanRaw];
+          const prog = mapTimeToProfileProgress(curSec, totalDur, prof);
+          renderProsodyCanvas({ mode: 'native', progress: prog });
+        }
+      );
+    }
 
     // Apply clean fallback theme tokens ONLY when opened standalone in local Chrome/Edge outside host iframe
     (function ensureStandaloneTheme() {
@@ -715,7 +1340,6 @@
       const btn = document.getElementById('btn-record');
       const status = document.getElementById('echo-status');
       const helpBox = document.getElementById('mic-help-box');
-      const canvas = document.getElementById('wave-canvas');
       helpBox.classList.add('hidden');
 
       if (mediaRecorder && mediaRecorder.state === 'recording') {
@@ -723,46 +1347,97 @@
         btn.textContent = '🎙 重新跟读录音';
         return;
       }
+
+      stopActivePlayback();
+      // Unlock AudioContext synchronously inside user click gesture BEFORE awaiting getUserMedia
+      const ctx = ensureLiveAudioCtx();
+
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error('UnsupportedContext');
         }
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (ctx && ctx.state === 'suspended') await ctx.resume();
+
         audioChunks = [];
+        liveMicFrames = [];
         mediaRecorder = new MediaRecorder(stream);
-        canvas.classList.remove('hidden');
-        drawWaveform(stream, canvas);
+        startLiveMicOscilloscope(stream, ctx);
         mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
         mediaRecorder.onstop = () => {
-          cancelAnimationFrame(animFrame);
+          if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+          if (activeMicSource) { try { activeMicSource.disconnect(); } catch (e) {} activeMicSource = null; }
           stream.getTracks().forEach(t => t.stop());
           const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-          setUserAudioBlob(blob, '✅ 录音完成！点击「🔁 AB连播对比」直接听母语原声与你的重音节奏差距。');
+          const capturedFrames = liveMicFrames.slice();
+          setUserAudioBlob(blob, '✅ 录音完成！下方已叠加你的音高起伏与连读流（橙色），点击「🔁 AB连播对比」听差距。', capturedFrames);
         };
         mediaRecorder.start();
         btn.textContent = '⏹ 停止录音';
-        status.textContent = '🔴 正在录音... 请把整句话当成一个长单词连贯滑出来！';
+        status.textContent = '🔴 正在录音... 请对照下方蓝色母语曲线，把整句话连贯滑出来！';
       } catch (err) {
         let inIframe = false;
         try { inIframe = window.self !== window.top; } catch (e) { inIframe = true; }
-        status.textContent = '⚠️ 内嵌预览沙盒默认拦截了麦克风硬件接口（浏览器安全策略限制）';
+        status.textContent = '⚠️ 尚未获取到麦克风输入权限';
         helpBox.classList.remove('hidden');
         if (inIframe) {
           helpBox.innerHTML = `
             <div class="font-bold">💡 两种方式立即解决（任选其一）：</div>
-            <div><strong>方法 1（推荐 · 开启实时麦克风波形录音）：</strong> 将本单文件下载到本地电脑，直接用 Chrome / Edge 双击打开（脱离内嵌沙盒框后，点击录音就会正常弹出「允许使用麦克风」授权弹窗，且内置全部 46 条真声无需联网）：
+            <div><strong>方法 1（推荐 · 开启实时麦克风波形录音）：</strong> 将本单文件下载到本地电脑，直接用 Chrome / Edge 双击打开（脱离内嵌沙盒框后即可正常授权麦克风，且内置全部真声无需联网）：
               <button onclick="downloadStandaloneApp()" class="ml-1 px-3 py-1 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-bold">⬇ 一键下载本地独立版 (.html)</button>
             </div>
-            <div><strong>方法 2（不离开当前预览窗）：</strong> 用手机或电脑自带录音机录一句，点击上方 <strong>「📂 导入录音对比」</strong> 即可启用 <strong>「🔁 AB连播对比」</strong>。</div>`;
+            <div><strong>方法 2（不离开当前窗口）：</strong> 用手机或电脑录音机录一句，点击上方 <strong>「📂 导入录音对比」</strong> 即可自动生成你的音高连读曲线并启用 <strong>「🔁 AB连播对比」</strong>。</div>`;
         } else {
           helpBox.innerHTML = `
             <div class="font-bold">💡 请开启浏览器麦克风权限：</div>
-            <div>点击浏览器地址栏最左侧的 <strong>🔒 锁形/设置图标</strong> → 将 <strong>「麦克风 (Microphone)」设为「允许」</strong> → 再点一次「🎙 开始跟读录音对比」即可！</div>`;
+            <div>点击浏览器地址栏最左侧的 <strong>🔒 锁形/设置图标</strong> → 将 <strong>「麦克风 (Microphone)」设为「允许」</strong> → 再点一次「🎙 开始跟读录音对比」即可（或点击「📂 导入录音对比」载入录音文件）！</div>`;
         }
       }
     }
 
-    function setUserAudioBlob(blob, msg) {
+    function startLiveMicOscilloscope(stream, ctx) {
+      if (!ctx) return;
+      const source = ctx.createMediaStreamSource(stream);
+      activeMicSource = source;
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+
+      const floatBuf = new Float32Array(analyser.fftSize);
+      const byteBuf = new Uint8Array(analyser.fftSize);
+      const item = ECHO_DATA[state.echoIdx];
+      const cleanRaw = String(item.raw).replace(/\s*\/\s*/g, '. ').trim();
+      const natProf = ECHO_PROFILES[cleanRaw];
+      const targetSpanSec = natProf ? Math.max(2.2, (natProf.tEnd - natProf.tStart) * 1.15) : 4.0;
+      const recStartMs = performance.now();
+      let lastSampleMs = 0;
+
+      function tick() {
+        animFrame = requestAnimationFrame(tick);
+        const now = performance.now();
+        const elapsedSec = (now - recStartMs) / 1000;
+        if (now - lastSampleMs >= 24) {
+          lastSampleMs = now;
+          if (analyser.getFloatTimeDomainData) {
+            analyser.getFloatTimeDomainData(floatBuf);
+          } else {
+            analyser.getByteTimeDomainData(byteBuf);
+            for (let i = 0; i < byteBuf.length; i++) floatBuf[i] = (byteBuf[i] - 128) / 128;
+          }
+          let sumSq = 0;
+          for (let i = 0; i < floatBuf.length; i++) sumSq += floatBuf[i] * floatBuf[i];
+          const rms = Math.sqrt(sumSq / floatBuf.length);
+          const f0 = rms > 0.007 ? detectFrameF0(floatBuf, ctx.sampleRate, 0, Math.min(floatBuf.length, Math.floor(ctx.sampleRate * 0.04))) : null;
+          liveMicFrames.push({ time: elapsedSec, rms, f0 });
+        }
+        const liveProf = buildLiveRecordingPreview(liveMicFrames, targetSpanSec, 96);
+        const prog = Math.min(1, elapsedSec / Math.max(targetSpanSec, elapsedSec));
+        renderProsodyCanvas({ mode: 'recording', progress: prog, liveProfile: liveProf });
+      }
+      tick();
+    }
+
+    async function setUserAudioBlob(blob, msg, fallbackFrames = null) {
       if (audioUrl) URL.revokeObjectURL(audioUrl);
       audioUrl = URL.createObjectURL(blob);
       document.getElementById('btn-play-rec').classList.remove('hidden');
@@ -770,32 +1445,84 @@
       document.getElementById('mic-help-box').classList.add('hidden');
       document.getElementById('echo-status').textContent = msg;
       addXP(1);
+
+      let decodedProf = null;
+      try {
+        const arrBuf = await blob.arrayBuffer();
+        const ctx = ensureLiveAudioCtx() || new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, 22050);
+        const audioBuf = await ctx.decodeAudioData(arrBuf.slice(0));
+        decodedProf = analyzePCMBuffer(audioBuf, 96);
+      } catch (e) {}
+
+      if (!decodedProf && fallbackFrames && fallbackFrames.length > 3) {
+        const dur = fallbackFrames[fallbackFrames.length - 1].time;
+        decodedProf = summarizeFramesToProfile(fallbackFrames, dur, 96);
+      }
+      userProfile = decodedProf;
+      renderProsodyCanvas({ mode: 'idle' });
     }
 
     function handleImportedAudio(input) {
       const file = input.files && input.files[0];
       if (!file) return;
-      setUserAudioBlob(file, `✅ 已载入你的录音（${file.name}）！点击「🔁 AB连播对比」听母语原声与你的差距。`);
+      setUserAudioBlob(file, `✅ 已载入你的录音（${file.name}）！下方已生成双轨音高连读对比，点击「🔁 AB连播对比」听差距。`);
       input.value = '';
     }
 
-    function playUserRecording() {
+    function playUserRecording(onDone = null) {
       if (!audioUrl) return;
-      new Audio(audioUrl).play();
+      stopActivePlayback();
+      const u = new Audio(audioUrl);
+      activeUserAudio = u;
+      const trackUser = () => {
+        if (activeUserAudio !== u || u.paused || u.ended) return;
+        const dur = (u.duration && isFinite(u.duration)) ? u.duration : (userProfile ? userProfile.duration : 3.5);
+        const prog = mapTimeToProfileProgress(u.currentTime, dur, userProfile);
+        renderProsodyCanvas({ mode: 'user', progress: prog });
+        playbackRaf = requestAnimationFrame(trackUser);
+      };
+      u.onended = () => {
+        if (playbackRaf) { cancelAnimationFrame(playbackRaf); playbackRaf = null; }
+        if (activeUserAudio === u) activeUserAudio = null;
+        renderProsodyCanvas({ mode: 'idle' });
+        if (onDone) onDone();
+      };
+      u.play().then(() => {
+        playbackRaf = requestAnimationFrame(trackUser);
+      }).catch(() => { if (onDone) onDone(); });
     }
 
     function playABCompare() {
       if (!audioUrl) return;
+      const item = ECHO_DATA[state.echoIdx];
+      const cleanRaw = String(item.raw).replace(/\s*\/\s*/g, '. ').trim();
       const status = document.getElementById('echo-status');
-      status.textContent = '🔁 AB对比中：[A] 正在播放母语者原声...';
-      speakText(ECHO_DATA[state.echoIdx].raw, 1.0, () => {
-        status.textContent = '🔁 AB对比中：[B] 正在播放你的发音...（注意对比弱读压缩与重音鼓点！）';
-        setTimeout(() => {
-          const u = new Audio(audioUrl);
-          u.onended = () => { status.textContent = '✅ AB连播完成！察觉到哪个词读太重或没连起来了吗？再来一遍！'; };
-          u.play();
-        }, 350);
-      });
+      status.textContent = '🔁 AB对比中：[A] 正在播放母语者原声（观察蓝色游标与音高弧线）...';
+      speakText(
+        item.raw,
+        1.0,
+        () => {
+          highlightProsodyBeat(-1);
+          status.textContent = '🔁 AB对比中：[B] 正在播放你的发音（观察橙色游标与连读不断流差距）...';
+          echoCycleTimer = setTimeout(() => {
+            playUserRecording(() => {
+              status.textContent = '✅ AB连播对比完成！对照下方蓝/橙双轨曲线，看看哪处词间断开了或重音音高没扬起来？';
+            });
+          }, 350);
+        },
+        (curSec, totalDur) => {
+          const prof = ECHO_PROFILES[cleanRaw];
+          const prog = mapTimeToProfileProgress(curSec, totalDur, prof);
+          renderProsodyCanvas({ mode: 'native', progress: prog });
+        }
+      );
+    }
+
+    window.addEventListener('resize', () => renderProsodyCanvas());
+    if (window.matchMedia) {
+      try {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => renderProsodyCanvas());
+      } catch (e) {}
     }
 
     function downloadStandaloneApp() {
@@ -811,33 +1538,6 @@
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 2000);
       } catch (e) {}
-    }
-    function drawWaveform(stream, canvas) {
-      const ctx = canvas.getContext('2d');
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createMediaStreamSource(stream);
-      const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
-      source.connect(analyser);
-      const data = new Uint8Array(analyser.frequencyBinCount);
-      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#3b82f6';
-      function render() {
-        animFrame = requestAnimationFrame(render);
-        analyser.getByteTimeDomainData(data);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = primaryColor;
-        ctx.beginPath();
-        const slice = canvas.width / data.length;
-        let x = 0;
-        for (let i = 0; i < data.length; i++) {
-          const y = (data[i] / 128.0) * (canvas.height / 2);
-          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-          x += slice;
-        }
-        ctx.stroke();
-      }
-      render();
     }
 
     // --- Tab 2: Spatial Schema & Nuance Quiz ---
