@@ -209,7 +209,16 @@
                 </span>
               </div>
             </div>
-            <canvas id="wave-canvas" height="156" class="w-full h-[156px] block rounded-xl bg-[var(--card)] border border-[var(--border)]"></canvas>
+            <div id="align-toolbar" class="hidden flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-xs">
+              <span class="text-[var(--muted-foreground)] font-medium">✋ <strong class="text-[var(--foreground)]">手动对齐起点</strong>：直接在下方画布<strong>左右拖动橙色音波</strong>（或点微调）使开口处与蓝线对齐</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="nudgeUserShift(-0.05)" class="px-2 py-1 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[#ea580c] font-semibold">◀ 左移</button>
+                <span id="align-offset-badge" class="font-mono px-2 py-0.5 rounded bg-[var(--secondary)] text-[var(--foreground)] min-w-[4.6rem] text-center">0.00s</span>
+                <button type="button" onclick="nudgeUserShift(0.05)" class="px-2 py-1 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[#ea580c] font-semibold">右移 ▶</button>
+                <button type="button" onclick="resetUserShift()" class="px-2 py-1 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">↺ 自动对齐</button>
+              </div>
+            </div>
+            <canvas id="wave-canvas" height="156" style="touch-action: pan-y; user-select: none;" class="w-full h-[156px] block rounded-xl bg-[var(--card)] border border-[var(--border)]"></canvas>
             <div id="prosody-metrics" class="text-xs text-[var(--muted-foreground)] leading-relaxed"></div>
           </div>
         </div>
@@ -755,6 +764,10 @@
     let animFrame = null;
     let userProfile = null;
     let userAudioBuffer = null;
+    let userRawFrames = null;
+    let userRawDuration = 0;
+    let userShiftSec = 0;
+    let isDraggingWave = false;
     let liveMicFrames = [];
     let activeMicSource = null;
 
@@ -848,8 +861,9 @@
       return { firstIdx, lastIdx, noiseFloor, peakRms: Math.max(1e-5, peakRms - noiseFloor) };
     }
 
-    function summarizeFramesToProfile(frames, totalDuration, bins = 96) {
+    function summarizeFramesToProfile(frames, totalDuration, bins = 96, shiftSec = 0) {
       if (!frames || !frames.length) return null;
+      const n = frames.length;
       const { firstIdx, lastIdx, noiseFloor } = findSpeechBounds(frames);
 
       let maxCleanRms = 1e-5;
@@ -861,11 +875,11 @@
       const rawF0 = frames.map(f => (Math.max(0, f.rms - noiseFloor * 1.1) >= maxCleanRms * 0.08 ? f.f0 : null));
       const cleanF0 = rawF0.slice();
       const voicedF0 = [];
-      for (let fi = firstIdx; fi <= lastIdx; fi++) {
+      for (let fi = 0; fi < n; fi++) {
         const trio = [rawF0[fi - 1], rawF0[fi], rawF0[fi + 1]].filter(x => x != null).sort((a, b) => a - b);
         if (rawF0[fi] != null && trio.length >= 2) {
           cleanF0[fi] = trio[Math.floor(trio.length / 2)];
-          voicedF0.push(cleanF0[fi]);
+          if (fi >= firstIdx && fi <= lastIdx) voicedF0.push(cleanF0[fi]);
         } else if (trio.length === 0) {
           cleanF0[fi] = null;
         }
@@ -876,24 +890,35 @@
       const p90 = voicedF0.length ? voicedF0[Math.floor(voicedF0.length * 0.90)] : medF0;
       const semitoneSpan = +(Math.max(0.8, 12 * Math.log2(Math.max(1, p90) / Math.max(1, p10)))).toFixed(1);
 
+      const realDur = +(totalDuration || frames[n - 1].time || 1);
+      const baseStart = frames[firstIdx].time || 0;
+      const baseEnd = Math.max(baseStart + 0.30, frames[lastIdx].time || realDur);
+      const baseSpan = baseEnd - baseStart;
+      const winStart = baseStart - shiftSec;
+      const winEnd = baseEnd - shiftSec;
+      const binStepSec = baseSpan / Math.max(1, bins - 1);
+      const radiusSec = Math.max(0.024, binStepSec * 0.88);
+
       const env = new Array(bins).fill(0);
       const pitch = new Array(bins).fill(null);
-      const span = Math.max(1, lastIdx - firstIdx);
+      let leftK = 0;
       for (let b = 0; b < bins; b++) {
-        const fCenter = firstIdx + (b / (bins - 1)) * span;
-        const f0Idx = Math.max(firstIdx, Math.floor(fCenter - 1));
-        const f1Idx = Math.min(lastIdx, Math.ceil(fCenter + 1));
-        let rSum = 0, rCnt = 0, pSum = 0, pCnt = 0;
-        for (let k = f0Idx; k <= f1Idx; k++) {
-          rSum += Math.max(0, frames[k].rms - noiseFloor * 1.15);
-          rCnt++;
+        const tCenter = winStart + b * binStepSec;
+        if (tCenter < -0.01 || tCenter > realDur + 0.01) continue;
+        while (leftK < n && frames[leftK].time < tCenter - radiusSec) leftK++;
+        let rSum = 0, wSum = 0, pSum = 0, pwSum = 0;
+        for (let k = leftK; k < n && frames[k].time <= tCenter + radiusSec; k++) {
+          const dist = Math.abs(frames[k].time - tCenter);
+          const w = Math.max(0.05, 1 - dist / (radiusSec * 1.05));
+          rSum += Math.max(0, frames[k].rms - noiseFloor * 1.15) * w;
+          wSum += w;
           if (cleanF0[k]) {
             const st = 12 * Math.log2(cleanF0[k] / medF0);
-            if (Math.abs(st) <= 9) { pSum += st; pCnt++; }
+            if (Math.abs(st) <= 9) { pSum += st * w; pwSum += w; }
           }
         }
-        env[b] = +(Math.min(1, Math.pow((rSum / Math.max(1, rCnt)) / maxCleanRms, 0.72))).toFixed(2);
-        if (pCnt > 0) pitch[b] = +(Math.max(0.06, Math.min(0.94, 0.5 + (pSum / pCnt) / 13))).toFixed(2);
+        if (wSum > 0) env[b] = +(Math.min(1, Math.pow((rSum / wSum) / maxCleanRms, 0.72))).toFixed(2);
+        if (pwSum > 0) pitch[b] = +(Math.max(0.06, Math.min(0.94, 0.5 + (pSum / pwSum) / 13))).toFixed(2);
       }
 
       for (let b = 1; b < bins - 1; b++) {
@@ -912,11 +937,20 @@
           smoothPitch[b] = +(0.25 * pitch[b - 1] + 0.5 * pitch[b] + 0.25 * pitch[b + 1]).toFixed(2);
         }
       }
-      const continuity = Math.round((env.filter(v => v >= 0.12).length / bins) * 100);
+      const inBoundsBins = env.filter((_, idx) => {
+        const t = winStart + idx * binStepSec;
+        return t >= 0 && t <= realDur;
+      });
+      const continuity = inBoundsBins.length
+        ? Math.round((inBoundsBins.filter(v => v >= 0.12).length / inBoundsBins.length) * 100)
+        : 0;
       return {
-        duration: +(totalDuration || frames[frames.length - 1].time || 1).toFixed(2),
-        tStart: +(frames[firstIdx].time || 0).toFixed(2),
-        tEnd: +(Math.max((frames[firstIdx].time || 0) + 0.25, frames[lastIdx].time || totalDuration || 1)).toFixed(2),
+        duration: +realDur.toFixed(2),
+        baseStart: +baseStart.toFixed(3),
+        baseEnd: +baseEnd.toFixed(3),
+        shiftSec: +shiftSec.toFixed(3),
+        tStart: +winStart.toFixed(3),
+        tEnd: +winEnd.toFixed(3),
         semitoneSpan,
         continuity,
         env,
@@ -924,7 +958,7 @@
       };
     }
 
-    function analyzePCMBuffer(audioBuf, bins = 96) {
+    function extractPCMFrames(audioBuf) {
       const samples = audioBuf.getChannelData(0);
       const sampleRate = audioBuf.sampleRate;
       const hop = Math.max(1, Math.floor(sampleRate * 0.015));
@@ -943,7 +977,12 @@
           frames[i].f0 = detectFrameF0(samples, sampleRate, frames[i].pos, win);
         }
       }
-      return summarizeFramesToProfile(frames, audioBuf.duration, bins);
+      return frames;
+    }
+
+    function analyzePCMBuffer(audioBuf, bins = 96) {
+      const frames = extractPCMFrames(audioBuf);
+      return summarizeFramesToProfile(frames, audioBuf.duration, bins, 0);
     }
 
     async function ensureNativeProfile(rawText) {
@@ -1106,7 +1145,11 @@
         return;
       }
       const uDur = Math.max(0.3, usrProf.tEnd - usrProf.tStart).toFixed(1);
-      const trimmedLead = usrProf.tStart >= 0.2 ? `（已自动裁掉开口前 ${usrProf.tStart.toFixed(1)}s 停顿）` : '';
+      const autoLead = (usrProf.baseStart !== undefined ? usrProf.baseStart : usrProf.tStart);
+      const manualTag = Math.abs(userShiftSec) >= 0.01 ? ` · 手动偏移 ${userShiftSec > 0 ? '+' : ''}${userShiftSec.toFixed(2)}s` : '';
+      const trimmedLead = (autoLead >= 0.2 || manualTag)
+        ? `（${autoLead >= 0.2 ? `已自动裁掉前 ${autoLead.toFixed(1)}s 停顿` : '自动对齐'}${manualTag}）`
+        : '';
       const contDiff = usrProf.continuity - nativeProf.continuity;
       const spanDiff = +(usrProf.semitoneSpan - nativeProf.semitoneSpan).toFixed(1);
       let tip = '👏 你的连读连贯度与语调起伏非常接近母语者！可点「🔁 AB连播」或「🎧 原声+录音同时播放」精修细节。';
@@ -1123,6 +1166,9 @@
     function renderProsodyCanvas(opts = {}) {
       const canvas = document.getElementById('wave-canvas');
       if (!canvas) return;
+      const canDrag = !!(userRawFrames && userRawFrames.length > 3 && (!mediaRecorder || mediaRecorder.state !== 'recording'));
+      canvas.style.cursor = isDraggingWave ? 'grabbing' : (canDrag ? 'grab' : 'default');
+
       const rect = canvas.getBoundingClientRect();
       if (rect.width < 20 || rect.height < 20) return;
 
@@ -1249,6 +1295,37 @@
       // 4. Draw User Pitch Contour Curve
       if (displayUserProf && displayUserProf.pitch) {
         drawPitchCurve(ctx, displayUserProf.pitch, plotLeft, plotTop, plotW, plotBottom, userLine, userGlow, false, displayUserProf.env);
+      }
+
+      // 4b. Visual start-alignment guide & live offset HUD while dragging user waveform
+      if (isDraggingWave) {
+        let natOnsetBin = 0;
+        if (nativeProf && nativeProf.env) {
+          const idx = nativeProf.env.findIndex(v => v >= 0.14);
+          if (idx >= 0) natOnsetBin = idx;
+        }
+        const alignX = plotLeft + (natOnsetBin / Math.max(1, (nativeProf && nativeProf.env ? nativeProf.env.length : 96) - 1)) * plotW;
+        ctx.save();
+        ctx.strokeStyle = nativeLine;
+        ctx.setLineDash([4, 3]);
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(alignX, plotTop);
+        ctx.lineTo(alignX, plotBottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = '600 10.5px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = nativeLine;
+        ctx.fillText('🎯 原声起点基准线', alignX + 5, plotTop + 2);
+
+        const shiftTxt = `↔ 拖动对齐: ${userShiftSec >= 0 ? '+' : ''}${userShiftSec.toFixed(2)}s`;
+        ctx.textAlign = 'right';
+        ctx.fillStyle = userLine;
+        ctx.fillText(shiftTxt, plotRight - 2, plotTop + 2);
+        ctx.restore();
       }
 
       // 5. Draw Bottom Rhythm / Beat Track
@@ -1382,10 +1459,18 @@
       stopActivePlayback();
       userProfile = null;
       userAudioBuffer = null;
+      userRawFrames = null;
+      userRawDuration = 0;
+      userShiftSec = 0;
+      isDraggingWave = false;
       if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
       document.getElementById('btn-play-rec').classList.add('hidden');
       document.getElementById('btn-ab-compare').classList.add('hidden');
       document.getElementById('btn-sync-compare').classList.add('hidden');
+      const alignBar = document.getElementById('align-toolbar');
+      if (alignBar) alignBar.classList.add('hidden');
+      const badge = document.getElementById('align-offset-badge');
+      if (badge) badge.textContent = '0.00s';
       document.getElementById('btn-record').textContent = '🎙 开始跟读录音对比';
     }
     function prevEcho() {
@@ -1594,6 +1679,52 @@
       tick();
     }
 
+    function updateAlignToolbar() {
+      const bar = document.getElementById('align-toolbar');
+      const badge = document.getElementById('align-offset-badge');
+      const hasRaw = !!(userRawFrames && userRawFrames.length > 3);
+      if (bar) bar.classList.toggle('hidden', !hasRaw);
+      if (badge) {
+        const sign = userShiftSec > 0.004 ? '+' : '';
+        badge.textContent = `${sign}${userShiftSec.toFixed(2)}s`;
+      }
+    }
+
+    function applyUserShift(nextShiftSec) {
+      if (!userRawFrames || userRawFrames.length <= 3) return;
+      const baseStart = userProfile && userProfile.baseStart !== undefined ? userProfile.baseStart : 0;
+      const baseEnd = userProfile && userProfile.baseEnd !== undefined ? userProfile.baseEnd : Math.max(1, userRawDuration);
+      const baseSpan = Math.max(0.3, baseEnd - baseStart);
+      const minShift = -Math.max(baseSpan * 0.75, (userRawDuration - baseStart) - 0.25);
+      const maxShift = baseStart + baseSpan * 0.75;
+      userShiftSec = +Math.max(minShift, Math.min(maxShift, nextShiftSec)).toFixed(3);
+      if (Math.abs(userShiftSec) < 0.004) userShiftSec = 0;
+      userProfile = summarizeFramesToProfile(userRawFrames, userRawDuration, 96, userShiftSec);
+      updateAlignToolbar();
+      renderProsodyCanvas({ mode: 'idle' });
+    }
+
+    function nudgeUserShift(deltaSec) {
+      if (!userRawFrames || userRawFrames.length <= 3) return;
+      stopActivePlayback();
+      applyUserShift(userShiftSec + deltaSec);
+      const status = document.getElementById('echo-status');
+      if (status) {
+        const sign = userShiftSec > 0 ? '+' : '';
+        status.textContent = `✋ 已手动微调录音位置（${sign}${userShiftSec.toFixed(2)}s）—— 点「🎧 原声+录音同时播放」即可试听对齐效果！`;
+      }
+    }
+
+    function resetUserShift() {
+      if (!userRawFrames || userRawFrames.length <= 3) return;
+      stopActivePlayback();
+      applyUserShift(0);
+      const status = document.getElementById('echo-status');
+      if (status) {
+        status.textContent = '↺ 已恢复自动语音起点对齐！你也可以随时左右拖动下方橙色音波微调。';
+      }
+    }
+
     async function setUserAudioBlob(blob, msg, fallbackFrames = null) {
       if (audioUrl) URL.revokeObjectURL(audioUrl);
       audioUrl = URL.createObjectURL(blob);
@@ -1606,22 +1737,29 @@
 
       let decodedProf = null;
       userAudioBuffer = null;
+      userRawFrames = null;
+      userRawDuration = 0;
+      userShiftSec = 0;
       try {
         const arrBuf = await blob.arrayBuffer();
         const ctx = ensureLiveAudioCtx() || new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, 22050);
         const audioBuf = await ctx.decodeAudioData(arrBuf.slice(0));
         userAudioBuffer = audioBuf;
-        decodedProf = analyzePCMBuffer(audioBuf, 96);
+        userRawFrames = extractPCMFrames(audioBuf);
+        userRawDuration = audioBuf.duration;
+        decodedProf = summarizeFramesToProfile(userRawFrames, userRawDuration, 96, 0);
       } catch (e) {}
 
       if (!decodedProf && fallbackFrames && fallbackFrames.length > 3) {
-        const dur = fallbackFrames[fallbackFrames.length - 1].time;
-        decodedProf = summarizeFramesToProfile(fallbackFrames, dur, 96);
+        userRawFrames = fallbackFrames;
+        userRawDuration = fallbackFrames[fallbackFrames.length - 1].time;
+        decodedProf = summarizeFramesToProfile(userRawFrames, userRawDuration, 96, 0);
       }
       userProfile = decodedProf;
+      updateAlignToolbar();
       if (decodedProf) {
-        const leadMsg = decodedProf.tStart >= 0.2 ? `（已自动裁掉开口前 ${decodedProf.tStart.toFixed(1)}s 空白停顿）` : '';
-        document.getElementById('echo-status').textContent = `✅ 录音对齐完成${leadMsg}！可点「🔁 AB连播对比」或「🎧 原声+录音同时播放」检验节奏贴合度。`;
+        const leadMsg = decodedProf.baseStart >= 0.2 ? `（已自动裁掉开口前 ${decodedProf.baseStart.toFixed(1)}s 停顿）` : '';
+        document.getElementById('echo-status').textContent = `✅ 录音已就绪${leadMsg}！若有偏差可直接左右拖动下方橙色音波对齐，再点「🎧 原声+录音同时播放」。`;
       }
       renderProsodyCanvas({ mode: 'idle' });
     }
@@ -1637,14 +1775,14 @@
       if (!audioUrl && !userAudioBuffer) return;
       stopActivePlayback();
 
-      // Prefer sample-accurate Web Audio playback trimmed directly to [tStart, tEnd] (skips pre/post silence!)
+      // Prefer sample-accurate Web Audio playback trimmed directly to [tStart, tEnd] (respects manual drag shift!)
       if (userAudioBuffer) {
         try {
           const ctx = ensureLiveAudioCtx();
           if (ctx) {
             if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-            const startOffset = userProfile ? Math.max(0, userProfile.tStart - 0.06) : 0;
-            const endOffset = userProfile ? Math.min(userAudioBuffer.duration, userProfile.tEnd + 0.08) : userAudioBuffer.duration;
+            const startOffset = userProfile ? Math.max(0, Math.min(userAudioBuffer.duration - 0.1, userProfile.tStart - 0.04)) : 0;
+            const endOffset = userProfile ? Math.min(userAudioBuffer.duration, Math.max(startOffset + 0.2, userProfile.tEnd + 0.08)) : userAudioBuffer.duration;
             const playDur = Math.max(0.2, endOffset - startOffset);
             const src = ctx.createBufferSource();
             src.buffer = userAudioBuffer;
@@ -1673,8 +1811,8 @@
 
       const u = new Audio(audioUrl);
       activeUserAudio = u;
-      const startOffset = userProfile ? Math.max(0, userProfile.tStart - 0.06) : 0;
-      const endLimit = userProfile ? userProfile.tEnd + 0.10 : Infinity;
+      const startOffset = userProfile ? Math.max(0, userProfile.tStart - 0.04) : 0;
+      const endLimit = userProfile ? Math.max(startOffset + 0.2, userProfile.tEnd + 0.10) : Infinity;
       const trackUser = () => {
         if (activeUserAudio !== u || u.paused || u.ended) return;
         if (u.currentTime >= endLimit) {
@@ -1765,7 +1903,7 @@
       const status = document.getElementById('echo-status');
       const badge = document.getElementById('audio-live-badge');
       const natProf = ECHO_PROFILES[cleanRaw] || null;
-      status.textContent = '🎧 原声+录音同步叠播中：已自动从开口第一声对齐起跑（观察蓝/橙双游标谁快谁慢）...';
+      status.textContent = '🎧 原声+录音同步叠播中：正按当前对齐起点同步播放（观察蓝/橙双游标谁快谁慢）...';
 
       const ctx = ensureLiveAudioCtx();
       if (ctx && userAudioBuffer) {
@@ -1783,23 +1921,27 @@
             }
           }
           if (nativeBuf) {
-            const natStart = natProf ? Math.max(0, natProf.tStart - 0.04) : 0;
+            const natTarget = (natProf ? natProf.tStart : 0) - 0.03;
+            const natDelay = Math.max(0, -natTarget);
+            const natOffset = Math.max(0, natTarget);
             const natEnd = natProf ? Math.min(nativeBuf.duration, natProf.tEnd + 0.08) : nativeBuf.duration;
-            const natDur = Math.max(0.2, natEnd - natStart);
+            const natDur = Math.max(0.15, natEnd - natOffset);
 
-            const usrStart = userProfile ? Math.max(0, userProfile.tStart - 0.04) : 0;
-            const usrEnd = userProfile ? Math.min(userAudioBuffer.duration, userProfile.tEnd + 0.08) : userAudioBuffer.duration;
-            const usrDur = Math.max(0.2, usrEnd - usrStart);
+            const usrTarget = (userProfile ? userProfile.tStart : 0) - 0.03;
+            const usrDelay = Math.max(0, -usrTarget);
+            const usrOffset = Math.max(0, Math.min(userAudioBuffer.duration - 0.1, usrTarget));
+            const usrEnd = userProfile ? Math.min(userAudioBuffer.duration, Math.max(usrOffset + 0.15, userProfile.tEnd + 0.08)) : userAudioBuffer.duration;
+            const usrDur = Math.max(0.15, usrEnd - usrOffset);
 
             const natSrc = ctx.createBufferSource();
             natSrc.buffer = nativeBuf;
             const natGain = ctx.createGain();
-            natGain.gain.value = calcSegmentGain(nativeBuf, natStart, natEnd, 0.115, 0.45, 1.35);
+            natGain.gain.value = calcSegmentGain(nativeBuf, natOffset, natEnd, 0.115, 0.45, 1.35);
 
             const usrSrc = ctx.createBufferSource();
             usrSrc.buffer = userAudioBuffer;
             const usrGain = ctx.createGain();
-            usrGain.gain.value = calcSegmentGain(userAudioBuffer, usrStart, usrEnd, 0.125, 0.45, 3.0);
+            usrGain.gain.value = calcSegmentGain(userAudioBuffer, usrOffset, usrEnd, 0.125, 0.45, 3.0);
 
             if (typeof ctx.createStereoPanner === 'function') {
               const natPan = ctx.createStereoPanner();
@@ -1834,7 +1976,7 @@
                 highlightProsodyBeat(-1);
                 renderProsodyCanvas({ mode: 'idle' });
                 if (badge) badge.textContent = '🔊 内置真人母语原声已就绪';
-                status.textContent = '✅ 原声+录音同步叠播完成！蓝/橙双游标越重合说明重音节拍越准，掉队处注意压缩弱读虚词。';
+                status.textContent = '✅ 原声+录音同步叠播完成！若起点仍差半拍，可继续左右拖动橙色音波再试听。';
               }
             };
             natSrc.onended = onOneEnded;
@@ -1843,16 +1985,16 @@
             const trackSync = () => {
               if (activeSyncSources !== syncSession) return;
               const elapsed = Math.max(0, ctx.currentTime - startAt);
-              const natCur = Math.min(natEnd, natStart + elapsed);
-              const usrCur = Math.min(usrEnd, usrStart + elapsed);
+              const natCur = Math.min(natEnd, natTarget + elapsed);
+              const usrCur = Math.min(usrEnd, usrTarget + elapsed);
               const nProg = mapTimeToProfileProgress(natCur, nativeBuf.duration, natProf);
               const uProg = mapTimeToProfileProgress(usrCur, userAudioBuffer.duration, userProfile);
               renderProsodyCanvas({ mode: 'sync', nativeProgress: nProg, userProgress: uProg });
               playbackRaf = requestAnimationFrame(trackSync);
             };
 
-            natSrc.start(startAt, natStart, natDur);
-            usrSrc.start(startAt, usrStart, usrDur);
+            natSrc.start(startAt + natDelay, natOffset, natDur);
+            usrSrc.start(startAt + usrDelay, usrOffset, usrDur);
             playbackRaf = requestAnimationFrame(trackSync);
             return;
           }
@@ -1864,9 +2006,11 @@
       const player = document.getElementById('tts-audio');
       const u = new Audio(audioUrl);
       activeUserAudio = u;
-      const usrStart = userProfile ? Math.max(0, userProfile.tStart - 0.04) : 0;
-      const usrEndLimit = userProfile ? userProfile.tEnd + 0.10 : Infinity;
-      const natStart = natProf ? Math.max(0, natProf.tStart - 0.04) : 0;
+      const usrTarget = (userProfile ? userProfile.tStart : 0) - 0.03;
+      const usrDelayMs = Math.round(Math.max(0, -usrTarget) * 1000);
+      const usrStart = Math.max(0, usrTarget);
+      const usrEndLimit = userProfile ? Math.max(usrStart + 0.2, userProfile.tEnd + 0.10) : Infinity;
+      const natStart = natProf ? Math.max(0, natProf.tStart - 0.03) : 0;
       if (b64 && player) {
         player.src = 'data:audio/mpeg;base64,' + b64;
         player.playbackRate = 1.0;
@@ -1887,9 +2031,12 @@
       };
       if (player && b64) player.onended = () => { doneA = true; finishBoth(); };
       u.onended = () => { doneB = true; finishBoth(); };
+      const startUserHtml = () => u.play().then(() => {
+        if (usrStart > 0 && u.currentTime < usrStart * 0.5) { try { u.currentTime = usrStart; } catch (e) {} }
+      }).catch(() => { doneB = true; finishBoth(); });
       const trackHtmlSync = () => {
         if (doneA && doneB) return;
-        if (!doneB && u.currentTime >= usrEndLimit) {
+        if (!doneB && !u.paused && u.currentTime >= usrEndLimit) {
           u.pause();
           doneB = true;
           finishBoth();
@@ -1898,17 +2045,73 @@
         const nDur = (player && player.duration && isFinite(player.duration)) ? player.duration : (natProf ? natProf.duration : 4.0);
         const uDur = (u.duration && isFinite(u.duration)) ? u.duration : (userProfile ? userProfile.duration : 4.0);
         const nProg = player ? mapTimeToProfileProgress(player.currentTime, nDur, natProf) : 1;
-        const uProg = mapTimeToProfileProgress(u.currentTime, uDur, userProfile);
+        const uProg = u.paused && !doneB ? 0 : mapTimeToProfileProgress(u.currentTime, uDur, userProfile);
         renderProsodyCanvas({ mode: 'sync', nativeProgress: nProg, userProgress: uProg });
         playbackRaf = requestAnimationFrame(trackHtmlSync);
       };
-      Promise.allSettled([
-        b64 && player ? player.play() : Promise.resolve(),
-        u.play().then(() => { if (usrStart > 0 && u.currentTime < usrStart * 0.5) { try { u.currentTime = usrStart; } catch (e) {} } })
-      ]).then(() => {
-        playbackRaf = requestAnimationFrame(trackHtmlSync);
-      });
+      if (b64 && player) player.play().catch(() => { doneA = true; finishBoth(); });
+      if (usrDelayMs > 0) {
+        echoCycleTimer = setTimeout(startUserHtml, usrDelayMs);
+      } else {
+        startUserHtml();
+      }
+      playbackRaf = requestAnimationFrame(trackHtmlSync);
     }
+
+    (function initWaveCanvasDrag() {
+      const canvas = document.getElementById('wave-canvas');
+      if (!canvas) return;
+      let dragPointerId = null;
+      let dragStartX = 0;
+      let dragStartShift = 0;
+
+      canvas.addEventListener('pointerdown', e => {
+        if (!userRawFrames || userRawFrames.length <= 3) return;
+        if (mediaRecorder && mediaRecorder.state === 'recording') return;
+        if (e.button !== undefined && e.button !== 0) return;
+        stopActivePlayback();
+        dragPointerId = e.pointerId;
+        dragStartX = e.clientX;
+        dragStartShift = userShiftSec;
+        isDraggingWave = true;
+        if (canvas.setPointerCapture) {
+          try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+        renderProsodyCanvas({ mode: 'idle' });
+      });
+
+      canvas.addEventListener('pointermove', e => {
+        if (!isDraggingWave || e.pointerId !== dragPointerId) return;
+        const rect = canvas.getBoundingClientRect();
+        const plotW = Math.max(40, (rect.width - 12) - 42);
+        const baseSpan = (userProfile && userProfile.baseEnd > userProfile.baseStart)
+          ? (userProfile.baseEnd - userProfile.baseStart)
+          : 3.2;
+        const dx = e.clientX - dragStartX;
+        const deltaSec = (dx / plotW) * baseSpan;
+        applyUserShift(dragStartShift + deltaSec);
+      });
+
+      const endDrag = e => {
+        if (!isDraggingWave || (e && dragPointerId !== null && e.pointerId !== dragPointerId)) return;
+        isDraggingWave = false;
+        if (e && canvas.releasePointerCapture) {
+          try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+        }
+        dragPointerId = null;
+        renderProsodyCanvas({ mode: 'idle' });
+        if (Math.abs(userShiftSec - dragStartShift) >= 0.01) {
+          const status = document.getElementById('echo-status');
+          if (status) {
+            const sign = userShiftSec > 0 ? '+' : '';
+            status.textContent = `✋ 已手动对齐录音起点（偏移 ${sign}${userShiftSec.toFixed(2)}s）—— 点「🎧 原声+录音同时播放」听听是否严丝合缝！`;
+          }
+        }
+      };
+
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+    })();
 
     window.addEventListener('resize', () => renderProsodyCanvas());
     if (window.matchMedia) {
