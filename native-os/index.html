@@ -39,6 +39,7 @@
     .phrase-art { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .phrase-art canvas { display: block; width: 100%; height: auto; }
     .phrase-art figcaption { padding: 5px 8px 6px; text-align: center; font-size: 0.75rem; color: var(--muted-foreground); }
+    .nuance-art { display: block; width: 100%; max-width: 570px; height: auto; margin-inline: auto; border: 1px solid var(--border); border-radius: 12px; }
   </style>
 </head>
 <body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-4 md:p-6 leading-relaxed">
@@ -662,6 +663,8 @@
 
     const NUANCE_QUIZZES = [
       {
+        art: 'squint',
+        artAlt: '阳光刺眼，人物皱起眉头，把眼睛眯成两条细缝。',
         category: '告别干瘪的 LOOK（看）',
         imagery: '阳光太刺眼，或者没戴眼镜看不清远处的小字，你把眼睛“眯成一条缝”努力看——6岁母语小孩脱口而出的词是？',
         options: ['squint', 'glare', 'glimpse', 'stare'],
@@ -671,6 +674,8 @@
         exZh: '餐厅灯光太暗了，我不得不眯起眼睛费力看菜单。'
       },
       {
+        art: 'smirk',
+        artAlt: '脸部特写：一边嘴角向上勾起，另一边嘴角几乎不动。',
         category: '告别干瘪的 LAUGH / SMILE（笑）',
         imagery: '听到别人出糗，或者自己早就料到结果时，嘴角歪向一边露出那种“得意、带点坏或讽刺”的笑——母语词是？',
         options: ['chuckle', 'smirk', 'giggle', 'beam'],
@@ -680,6 +685,8 @@
         exZh: '把你脸上那副幸灾乐祸的坏笑收起来——说正事呢！'
       },
       {
+        art: 'trudge',
+        artAlt: '背着背包的人弓着身子，在厚雪里一步一步挪动，身后留着深脚印。',
         category: '告别干瘪的 WALK（走）',
         imagery: '加班到凌晨两点或者背着沉重背包，双腿像灌了铅一样“沉重吃力地拖着步子走”——母语词是？',
         options: ['stroll', 'stride', 'trudge', 'tiptoe'],
@@ -689,6 +696,8 @@
         exZh: '我们筋疲力尽，深一脚浅一脚地在厚雪里拖着步子走回家。'
       },
       {
+        art: 'shoelaces',
+        artAlt: '一只鞋的蝴蝶结解开了，两截鞋带散落在鞋子两侧。',
         category: '日常生活高频具象动作',
         imagery: '出门走在路上，突然低头发现自己的“鞋带散开了”——母语者最自然的日常表达是？',
         options: ['My shoelaces came untied.', 'My shoelaces opened.', 'My shoe ropes are loose.', 'My shoelaces divorced.'],
@@ -698,6 +707,8 @@
         exZh: '等一下，我左脚鞋带刚散开了。'
       },
       {
+        art: 'tingle',
+        artAlt: '一个人先盘腿坐着，站起来后小腿和脚周围浮出小点，表示发麻和针刺感。',
         category: '身体微感觉高分辨率词',
         imagery: '盘腿坐太久，站起来时小腿“发麻、像无数根小针扎一样刺麻”——母语者怎么说？',
         options: ['My leg fell asleep / I have pins and needles.', 'My leg is very numb and sour.', 'My leg has electric feeling.', 'My leg lost feeling.'],
@@ -3095,10 +3106,380 @@
     }
     function selectParticle(k) { state.particleKey = k; renderParticles(); }
 
+    const NUANCE_ART = {
+      squint(g) {
+        const { ctx, box, line, circle, ellipse } = g;
+        const navy = '#274657';
+        const skin = '#ffdfbb';
+        const sun = '#db8d32';
+        const teal = '#217c91';
+
+        circle(82, 51, 32, '#ffe6a1');
+        circle(82, 51, 23, '#ffd06a', sun);
+        for (let i = 0; i < 8; i++) {
+          const angle = i * Math.PI / 4;
+          const x = Math.cos(angle);
+          const y = Math.sin(angle);
+          line([[82 + x * 34, 51 + y * 34], [82 + x * 43, 51 + y * 43]], sun, 2.5);
+        }
+        line([[119, 55], [148, 64]], '#e7ad4d', 2.5);
+        line([[113, 71], [149, 86]], '#e7ad4d', 2.5);
+
+        ellipse(226, 174, 91, 29, teal, navy);
+        box(203, 129, 46, 31, 10, '#f4bb92', navy);
+        ellipse(164, 91, 12, 18, skin, navy);
+        ellipse(287, 91, 12, 18, skin, navy);
+        ellipse(226, 85, 64, 65, skin, navy);
+        ctx.beginPath();
+        ctx.moveTo(163, 79);
+        ctx.bezierCurveTo(151, 23, 183, 10, 215, 13);
+        ctx.bezierCurveTo(242, 7, 286, 18, 292, 63);
+        ctx.bezierCurveTo(272, 56, 254, 46, 244, 32);
+        ctx.bezierCurveTo(220, 51, 193, 41, 172, 61);
+        ctx.closePath();
+        ctx.fillStyle = navy;
+        ctx.fill();
+
+        for (const x of [195, 254]) {
+          ctx.beginPath();
+          ctx.moveTo(x - 18, 83);
+          ctx.quadraticCurveTo(x, 76, x + 18, 84);
+          ctx.quadraticCurveTo(x, 87, x - 18, 83);
+          ctx.fillStyle = '#fffaf3';
+          ctx.fill();
+          ctx.strokeStyle = navy;
+          ctx.lineWidth = 2.6;
+          ctx.stroke();
+          ellipse(x - 3, 82, 4, 2.4, navy);
+          ctx.beginPath();
+          ctx.moveTo(x - 16, 72);
+          ctx.quadraticCurveTo(x - 2, 69, x + 14, 74);
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+        line([[173, 86], [166, 90]], '#bf7d64', 1.7);
+        line([[177, 91], [170, 96]], '#bf7d64', 1.7);
+        line([[275, 87], [282, 90]], '#bf7d64', 1.7);
+        line([[272, 92], [279, 97]], '#bf7d64', 1.7);
+        ctx.beginPath();
+        ctx.moveTo(224, 88);
+        ctx.quadraticCurveTo(214, 108, 232, 105);
+        ctx.strokeStyle = '#b87960';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        line([[211, 122], [232, 123], [240, 122]], '#8e594d', 2.7);
+      },
+      smirk(g) {
+        const { ctx, box, circle, ellipse } = g;
+        const navy = '#274657';
+        const skin = '#ffdfbb';
+        const teal = '#217c91';
+
+        circle(200, 82, 74, '#dceff0');
+        ellipse(200, 175, 87, 30, teal, navy);
+        box(178, 125, 44, 33, 11, '#f4bb92', navy);
+        ellipse(138, 87, 12, 18, skin, navy);
+        ellipse(263, 87, 12, 18, skin, navy);
+        ellipse(200, 84, 63, 66, skin, navy);
+        ctx.beginPath();
+        ctx.moveTo(137, 78);
+        ctx.bezierCurveTo(123, 30, 156, 14, 181, 17);
+        ctx.bezierCurveTo(200, 0, 266, 8, 268, 63);
+        ctx.lineTo(260, 77);
+        ctx.bezierCurveTo(253, 54, 238, 41, 223, 39);
+        ctx.bezierCurveTo(193, 62, 163, 47, 146, 69);
+        ctx.closePath();
+        ctx.fillStyle = navy;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(158, 69);
+        ctx.quadraticCurveTo(173, 65, 185, 70);
+        ctx.moveTo(213, 66);
+        ctx.quadraticCurveTo(230, 55, 244, 64);
+        ctx.strokeStyle = navy;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ellipse(172, 82, 14, 7, '#fffaf3', navy);
+        ellipse(229, 79, 14, 7, '#fffaf3', navy);
+        circle(178, 82, 4.4, navy);
+        circle(235, 79, 4.4, navy);
+        ellipse(161, 105, 11, 5, '#f6b493');
+        ellipse(240, 101, 11, 5, '#f6b493');
+        ctx.beginPath();
+        ctx.moveTo(199, 88);
+        ctx.quadraticCurveTo(190, 105, 207, 104);
+        ctx.strokeStyle = '#b87960';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(171, 119);
+        ctx.bezierCurveTo(188, 121, 212, 124, 234, 105);
+        ctx.bezierCurveTo(222, 129, 189, 133, 171, 119);
+        ctx.fillStyle = '#a45b57';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(171, 119);
+        ctx.bezierCurveTo(188, 121, 212, 124, 234, 105);
+        ctx.strokeStyle = '#733e40';
+        ctx.lineWidth = 3.1;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(231, 104);
+        ctx.quadraticCurveTo(236, 102, 238, 107);
+        ctx.strokeStyle = '#b87960';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      },
+      trudge(g) {
+        const { ctx, poly, line, circle, ellipse } = g;
+        const ink = '#274657';
+        const teal = '#217c91';
+        const snowEdge = '#b7d3dc';
+        const snow = '#f8fcfd';
+        const boot = '#304b5a';
+
+        // Snow banks overlap to show the depth of the ground around the boots.
+        poly([[0, 113], [64, 102], [132, 111], [197, 100], [271, 105], [333, 94], [400, 107], [400, 168], [0, 168]], '#e1eef3');
+        poly([[0, 130], [54, 125], [117, 133], [177, 125], [245, 135], [311, 124], [400, 122], [400, 168], [0, 168]], snow);
+        line([[316, 113], [349, 108], [382, 112]], '#ccdee6');
+        line([[10, 118], [44, 113], [73, 115]], '#ccdee6');
+
+        // A staggered, irregular trail with shaded impressions in the snow.
+        [[36, 155, 13, -0.16], [71, 143, 15, 0.10], [110, 150, 16, -0.11], [145, 135, 16, 0.09]].forEach(([x, y, length, angle]) => {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          ellipse(0, 0, length, 5.2, '#c8dee7');
+          ellipse(2, -1.1, length - 3.2, 3.4, '#98bac9');
+          ellipse(-3, 2.0, length - 5, 1.5, '#deedf1');
+          ctx.restore();
+        });
+
+        // The uphill posture, bent knees and broad boots carry most of the motion.
+        poly([[203, 88], [220, 96], [209, 115], [192, 132], [177, 125], [192, 107], [194, 96]], '#567885', ink);
+        poly([[200, 90], [220, 87], [240, 106], [243, 132], [227, 139], [222, 117], [202, 106]], '#456979', ink);
+        line([[218, 100], [231, 111], [234, 124]], '#9ab9c5', 2.5);
+
+        poly([[176, 121], [191, 127], [187, 138], [175, 144], [160, 141], [159, 136], [168, 132]], boot, ink);
+        line([[162, 139], [175, 141], [185, 136]], '#7794a2', 3);
+        poly([[227, 128], [242, 126], [246, 137], [260, 138], [266, 143], [264, 148], [228, 149], [224, 145]], boot, ink);
+        line([[229, 145], [260, 145]], '#7794a2', 3);
+
+        // The pack sits behind the inclined torso, with a visible shoulder strap.
+        poly([[194, 49], [211, 49], [219, 58], [215, 79], [205, 93], [185, 91], [177, 80], [183, 58]], '#ca7740', ink);
+        poly([[183, 71], [195, 73], [197, 87], [185, 88], [179, 81]], '#e0a06e', ink);
+        line([[189, 54], [204, 56], [207, 61]], '#f1c3a0', 2.8);
+
+        poly([[203, 95], [194, 91], [199, 77], [212, 61], [229, 52], [244, 61], [242, 75], [230, 81], [221, 100]], teal, ink);
+        line([[210, 91], [217, 78], [232, 62]], '#8c4a27', 4.5);
+        line([[210, 89], [217, 77], [229, 65]], '#e1a471', 2);
+        poly([[233, 64], [242, 68], [243, 82], [254, 89], [248, 100], [231, 91], [225, 73]], '#4da3b2', ink);
+        ellipse(255, 95, 7, 5.6, '#ca7740', ink);
+
+        poly([[239, 54], [246, 52], [255, 60], [245, 67], [237, 63]], '#e7ac6c', ink);
+        poly([[245, 38], [257, 36], [266, 43], [268, 51], [273, 54], [268, 58], [261, 64], [251, 61], [244, 54]], '#ffdfbb', ink);
+        ellipse(254, 52, 3.5, 4.8, '#f0bb98');
+        circle(265, 51, 1.6, ink);
+        line([[266, 57], [268, 58]], '#a25d49', 1.5);
+        poly([[241, 47], [243, 38], [250, 32], [260, 32], [267, 38], [269, 45], [261, 45], [250, 49], [244, 51]], '#ca7740', ink);
+        line([[244, 48], [253, 45], [264, 43]], '#efb98b', 3);
+
+        ellipse(283, 58, 5.5, 2.7, '#d4e7ed');
+        ellipse(294, 55, 7, 3.5, '#dcecf1');
+        poly([[145, 144], [160, 144], [169, 147], [185, 144], [199, 146], [216, 151], [237, 151], [253, 148], [269, 148], [291, 144], [315, 149], [321, 168], [143, 168]], snow);
+        line([[208, 150], [221, 151], [238, 151], [253, 149], [271, 149], [285, 145]], snowEdge, 1.6);
+        circle(194, 141, 2.2, '#c5dbe4');
+        circle(201, 142, 1.4, '#c5dbe4');
+      },
+      shoelaces(g) {
+        const { ctx, box, poly, line, circle, ellipse } = g;
+        const navy = '#274657';
+        const teal = '#217c91';
+        const warm = '#ca7740';
+        box(20, 141, 360, 17, 8, '#dbe9eb');
+
+        function sneaker(x, y, angle, untied) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          ellipse(0, 59, 33, 8, '#cee1e5');
+
+          ctx.beginPath();
+          ctx.moveTo(-19, -43);
+          ctx.bezierCurveTo(-27, -29, -22, -7, -27, 15);
+          ctx.bezierCurveTo(-40, 47, -26, 58, 0, 58);
+          ctx.bezierCurveTo(27, 58, 38, 46, 27, 15);
+          ctx.bezierCurveTo(22, -7, 27, -29, 19, -43);
+          ctx.quadraticCurveTo(0, -53, -19, -43);
+          ctx.closePath();
+          ctx.fillStyle = '#b4dce3';
+          ctx.fill();
+          ctx.strokeStyle = navy;
+          ctx.lineWidth = 2.6;
+          ctx.stroke();
+
+          ellipse(0, -29, 15, 11, navy);
+          poly([[-13, -14], [13, -14], [17, 20], [-17, 20]], '#e6eff1', teal);
+          ellipse(0, 38, 25, 13, '#f8fbfb', teal);
+
+          const lace = untied ? warm : navy;
+          [-8, 3, 14].forEach(eyeletY => {
+            circle(-15, eyeletY, 3.7, '#f8fbfb', navy);
+            circle(15, eyeletY, 3.7, '#f8fbfb', navy);
+          });
+          line([[-15, 14], [15, 14], [-15, 3], [15, -8]], lace, 3);
+          line([[15, 14], [15, 3], [-15, -8]], lace, 3);
+
+          ctx.beginPath();
+          ctx.strokeStyle = lace;
+          ctx.lineWidth = untied ? 3.8 : 3.2;
+          if (untied) {
+            ctx.moveTo(-15, -8);
+            ctx.bezierCurveTo(-37, -9, -44, 37, -66, 36);
+            ctx.bezierCurveTo(-74, 35, -72, 22, -82, 23);
+            ctx.moveTo(15, -8);
+            ctx.bezierCurveTo(43, -8, 49, 33, 65, 37);
+            ctx.quadraticCurveTo(77, 38, 83, 23);
+          } else {
+            ctx.moveTo(-15, -8);
+            ctx.quadraticCurveTo(-3, -15, 0, -13);
+            ctx.bezierCurveTo(-33, -37, -34, -10, 0, -13);
+            ctx.bezierCurveTo(33, -34, 32, -7, 0, -13);
+            ctx.quadraticCurveTo(6, -13, 15, -8);
+            ctx.moveTo(0, -13);
+            ctx.quadraticCurveTo(-8, -1, -27, 5);
+            ctx.moveTo(0, -13);
+            ctx.quadraticCurveTo(8, 0, 25, 7);
+          }
+          ctx.stroke();
+          if (untied) {
+            line([[-82, 23], [-87, 23]], navy, 3.3);
+            line([[83, 23], [86, 18]], navy, 3.3);
+          } else {
+            circle(0, -13, 3.8, navy);
+          }
+          ctx.restore();
+        }
+
+        sneaker(117, 86, -0.1, false);
+        sneaker(270, 85, 0.08, true);
+      },
+      tingle(g) {
+        const { box, poly, line, circle, ellipse } = g;
+        const navy = '#274657';
+        const teal = '#217c91';
+        const skin = '#ffdfbb';
+        const warm = '#ca7740';
+        box(15, 146, 161, 12, 6, '#dbe9eb');
+        box(224, 146, 161, 12, 6, '#dbe9eb');
+
+        // The same learner sits with their legs folded, then gets back on their feet.
+        ellipse(96, 145, 52, 7, '#cce2e6');
+        box(78, 55, 35, 52, 10, '#84c4cd', navy);
+        circle(96, 37, 16, skin, navy);
+        line([[83, 33], [92, 26], [103, 28], [109, 34]], navy, 4);
+        box(83, 88, 24, 20, 6, '#9fd3d9');
+        poly([[78, 95], [72, 109], [51, 123], [52, 134], [69, 137], [105, 110], [103, 95]], teal, navy);
+        poly([[107, 95], [118, 109], [138, 124], [137, 136], [121, 140], [84, 114], [87, 97]], '#609fac', navy);
+        ellipse(116, 139, 13, 5, skin, navy);
+        ellipse(75, 136, 13, 5, skin, navy);
+        line([[79, 64], [66, 92], [74, 107]], navy, 4.4);
+        line([[111, 64], [124, 92], [114, 109]], navy, 4.4);
+        circle(74, 107, 4.1, skin, navy);
+        circle(114, 109, 4.1, skin, navy);
+
+        line([[183, 87], [211, 87]], teal, 3.2);
+        poly([[209, 81], [218, 87], [209, 93]], teal);
+
+        ellipse(302, 145, 43, 7, '#cce2e6');
+        circle(302, 32, 16, skin, navy);
+        line([[289, 28], [298, 21], [309, 23], [315, 29]], navy, 4);
+        box(283, 50, 40, 44, 10, '#84c4cd', navy);
+        line([[285, 59], [273, 80], [271, 96]], navy, 4.3);
+        line([[322, 59], [336, 77], [342, 92]], navy, 4.3);
+        circle(271, 96, 4.1, skin, navy);
+        circle(342, 92, 4.1, skin, navy);
+        poly([[285, 88], [301, 89], [299, 111], [293, 138], [281, 136], [284, 111]], teal, navy);
+        poly([[302, 89], [322, 88], [324, 112], [331, 138], [319, 141], [307, 115]], '#609fac', navy);
+        box(270, 135, 26, 10, 5, navy);
+        box(319, 137, 24, 9, 4, navy);
+
+        // Short prick marks stay local to the leg and foot without implying injury.
+        [[314, 112], [338, 108], [342, 126], [353, 137], [317, 152], [346, 151], [306, 131]].forEach(([x, y], idx) => {
+          if (idx % 2) {
+            circle(x, y, 2.4, warm);
+          } else {
+            line([[x - 3, y], [x + 3, y]], warm, 1.8);
+            line([[x, y - 3], [x, y + 3]], warm, 1.8);
+          }
+        });
+      },
+    };
+
+    function drawNuancePicture(canvas, scene) {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.scale(2, 2);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.fillStyle = '#f2f8fa';
+      ctx.fillRect(0, 0, 400, 168);
+
+      function paint(fill, stroke) {
+        if (fill) {
+          ctx.fillStyle = fill;
+          ctx.fill();
+        }
+        if (stroke) {
+          ctx.strokeStyle = stroke;
+          ctx.stroke();
+        }
+      }
+
+      function box(x, y, w, h, r, fill, stroke) {
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+        else ctx.rect(x, y, w, h);
+        paint(fill, stroke);
+      }
+
+      function poly(points, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(...points[0]);
+        points.slice(1).forEach(point => ctx.lineTo(...point));
+        if (fill) ctx.closePath();
+        paint(fill, stroke);
+      }
+
+      function line(points, color, width = 2) {
+        ctx.save();
+        ctx.lineWidth = width;
+        poly(points, null, color);
+        ctx.restore();
+      }
+
+      function ellipse(x, y, rx, ry, fill, stroke) {
+        ctx.beginPath();
+        ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+        paint(fill, stroke);
+      }
+
+      function circle(x, y, radius, fill, stroke) {
+        ellipse(x, y, radius, radius, fill, stroke);
+      }
+
+      NUANCE_ART[scene]({ctx, box, poly, line, circle, ellipse});
+    }
+
     function renderNuanceQuiz() {
       const q = NUANCE_QUIZZES[state.nuanceIdx];
-      document.getElementById('nuance-quiz-box').innerHTML = `
+      const quiz = document.getElementById('nuance-quiz-box');
+      quiz.innerHTML = `
         <div class="text-xs font-semibold text-[var(--primary)]">${q.category}（第 ${state.nuanceIdx + 1}/${NUANCE_QUIZZES.length} 题）</div>
+        <canvas class="nuance-art" width="800" height="336" role="img"></canvas>
         <div class="text-base font-semibold">${q.imagery}</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           ${q.options.map((opt, idx) => `
@@ -3106,6 +3487,9 @@
           `).join('')}
         </div>
         <div id="nuance-feedback" class="hidden p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-sm space-y-2"></div>`;
+      const canvas = quiz.querySelector('canvas');
+      canvas.setAttribute('aria-label', q.artAlt);
+      drawNuancePicture(canvas, q.art);
     }
     function answerNuance(idx) {
       const q = NUANCE_QUIZZES[state.nuanceIdx];
