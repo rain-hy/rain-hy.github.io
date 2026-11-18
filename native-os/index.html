@@ -38,7 +38,7 @@
     .particle-direction { align-self: center; padding-bottom: 1.5rem; color: var(--primary); font-size: 1.25rem; font-weight: bold; }
     .phrase-art { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .phrase-art canvas { display: block; width: 100%; height: auto; }
-    .phrase-art figcaption { padding: 5px 8px 6px; text-align: center; font-size: 0.75rem; color: var(--muted-foreground); }
+    .phrase-art figcaption { padding: 7px 10px; border-top: 1px solid var(--border); font-size: 0.8125rem; line-height: 1.45; color: var(--muted-foreground); }
     .nuance-art { display: block; width: 100%; max-width: 570px; height: auto; margin-inline: auto; border: 1px solid var(--border); border-radius: 12px; }
   </style>
 </head>
@@ -535,129 +535,104 @@
 
     const PHRASE_ART = {
       "pull it off": {
-        caption: "时间很紧，团队还是按时把任务完成了。",
-        before: [["clipboard",64,57,57],["clock",115,49,44,"warm"]],
-        after: [["team",64,68,57],["flag",122,53,50],["check",145,32,23]]
+        before: [["task-hook",91,54,106]],
+        after: [["task-hook",91,54,106,"warm"],["check",146,26,23]]
       },
       "call it off": {
-        caption: "原本排好了会议，后来决定把它取消。",
-        before: [["calendar",84,55,61],["team",122,77,39]],
-        after: [["calendar",84,55,61,"muted"],["cross",112,64,46,"warm"]]
+        before: [["calendar",84,54,95],["event-card",92,64,39]],
+        after: [["calendar",68,54,90],["event-card",140,67,38,"warm"],["cross",152,39,22]]
       },
       "brush someone off": {
-        caption: "你认真提醒，他却敷衍一下就走了。",
-        before: [["person",50,73,49],["person",131,73,49],["speech",83,35,42],["warning",91,32,19,"warm"]],
-        after: [["person",45,73,49],["speech",67,35,31,"muted"],["arrow-right",102,69,27,"muted"],["person",145,73,49,"warm"]]
+        before: [["brush-shoulder",87,56,105]],
+        after: [["brush-shoulder",87,56,105,"warm"]]
       },
       "doze off": {
-        caption: "本来坐在沙发上看电影，不知不觉睡着了。",
-        before: [["couch",88,75,88],["person",86,55,45],["speaker",144,39,30]],
-        after: [["couch",88,75,88],["sleeping-person",89,65,56],["moon",137,32,40,"warm"]]
+        before: [["nod-head",85,57,101]],
+        after: [["nod-head",85,57,101,"warm"],["moon",140,35,25,"warm"]]
       },
       "figure it out": {
-        caption: "问题起初像散开的拼图，试着试着就找到了解法。",
-        before: [["puzzle",65,61,47],["puzzle",113,54,35,"muted"],["puzzle",103,82,27,"warm"]],
-        after: [["person",68,73,49],["bulb",115,43,50,"warm"],["check",143,63,24]]
+        before: [["untangle-thread",88,53,111]],
+        after: [["untangle-thread",88,53,111,"warm"]]
       },
       "burn out": {
-        caption: "精力像电池一样耗到见底，人也累垮了。",
-        before: [["person",56,65,53],["battery",118,57,54]],
-        after: [["person",56,65,53,"muted"],["battery",118,57,54,"muted"],["warning",146,81,25,"warm"]]
+        before: [["person",54,61,68],["battery",119,54,60]],
+        after: [["person",54,61,68,"muted"],["battery",119,54,60,"muted"],["warning",143,78,26,"warm"]]
       },
       "run out of": {
-        caption: "打开咖啡罐一看，里面已经空了。",
-        before: [["coffee",66,65,59],["coffee",119,65,49]],
-        after: [["coffee",85,65,64,"muted"],["cross",119,36,27]]
+        before: [["open-stock",90,57,104]],
+        after: [["open-stock",90,57,104,"warm"]]
       },
       "pan out": {
-        caption: "备选方案原本看着可行，执行后的结果却没达到预期。",
-        before: [["document",87,58,65],["bulb",127,37,32,"warm"]],
-        after: [["document",87,58,65,"muted"],["cross",119,72,43,"warm"]]
+        before: [["gold-pan",86,54,106]],
+        after: [["gold-pan",86,54,106,"warm"]]
       },
       "hear me out": {
-        caption: "先别打断，让对方把整段理由说完。",
-        before: [["person",48,73,48],["person",130,73,48,"warm"],["speech",72,35,34],["hand",112,43,29,"warm"]],
-        after: [["person",48,73,48],["person",130,73,48,"warm"],["speech",76,33,46],["check",123,35,24]]
+        before: [["person",40,72,58],["person",140,72,58,"warm"],["story-flow",90,35,90],["hand",130,50,27,"warm"]],
+        after: [["person",40,72,58],["person",140,72,58,"warm"],["story-flow",90,35,90,"warm"]]
       },
       "walk me through it": {
-        caption: "看不懂新定价，请同事一步步带你看",
-        before: [["person",53,60,52],["document",116,55,53]],
-        after: [["team",51,63,65],["clipboard",125,56,57],["check",145,75,25]]
+        before: [["team",45,66,52],["route-steps-start",111,59,96]],
+        after: [["route-steps-finish",70,59,96],["team",137,66,52]]
       },
       "fall through": {
-        caption: "买房已经谈妥，却在最后一刻没成交",
-        before: [["door",54,56,57],["document",122,55,53]],
-        after: [["door",52,56,57,"muted"],["document",120,58,49,"muted"],["cross",131,59,44,"warm"]]
+        before: [["deal-platform",90,70,132],["document",90,46,49]],
+        after: [["deal-crack",90,47,132],["arrow-down",110,57,26,"warm"],["document",86,77,42,"warm"]]
       },
       "follow through": {
-        caption: "有了点子，还要动手把答应的事做完",
-        before: [["bulb",56,56,49,"warm"],["clipboard",122,59,52,"muted"]],
-        after: [["clipboard",55,57,56],["flag",125,58,57],["check",68,76,26]]
+        before: [["golfer-ready",85,55,100]],
+        after: [["golfer-finish",85,55,100]]
       },
       "pull through": {
-        caption: "手术很凶险，她最终还是挺了过来",
-        before: [["bed",68,65,69],["warning",132,38,32,"warm"]],
-        after: [["person",67,58,58],["heart",130,50,43,"warm"]]
+        before: [["crisis-tunnel",94,56,92],["person",36,68,42,"muted"]],
+        after: [["crisis-tunnel",85,56,92],["person",143,65,44,"warm"],["check",146,32,29]]
       },
       "bring it up": {
-        caption: "本来把话留在心里，后来还是提了出来",
-        before: [["person",59,68,48],["thought",105,38,45,"muted"]],
-        after: [["person",41,73,42],["speech",73,34,45],["team",129,72,55]]
+        before: [["topic-waterline",89,62,116],["topic-card",89,76,42,"muted"],["arrow-up",126,56,32,"warm"]],
+        after: [["topic-table",90,70,110],["topic-card",90,41,47,"warm"]]
       },
       "wrap it up": {
-        caption: "会议时间快到了，大家收个尾",
-        before: [["team",65,65,64],["clock",134,44,40,"warm"]],
-        after: [["team",57,65,62,"muted"],["document",124,55,56],["check",140,73,35]]
+        before: [["packing-open",90,57,92]],
+        after: [["packing-closed",90,57,92]]
       },
       "bottle up": {
-        caption: "把不满憋在心里，像把情绪塞进瓶子",
-        before: [["person",59,61,58],["warning",124,42,38,"warm"]],
-        after: [["bottle",91,57,74],["warning",91,66,27,"warm"]]
+        before: [["pent-emotion",49,52,49,"warm"],["emotion-bottle-open",116,58,81]],
+        after: [["emotion-bottle-closed",90,56,91],["pent-emotion",90,69,28,"warm"]]
       },
       "own up to": {
-        caption: "发现出了错，主动说是自己的失误",
-        before: [["document",88,55,59],["cross",108,72,27,"warm"]],
-        after: [["person",55,68,54],["speech",119,39,53],["cross",119,37,22,"warm"]]
+        before: [["document",90,55,65],["cross",107,69,25,"warm"]],
+        after: [["hand-raised",65,56,76],["speech",127,39,51],["cross",127,36,24,"warm"]]
       },
       "put on": {
-        caption: "拿起外套，再穿到身上。",
         before: [["person",55,58,58],["jacket",124,61,51,"warm"]],
-        after: [["person",83,55,69],["jacket",83,70,46,"warm"],["check",135,42,25]]
+        after: [["person",83,55,69],["jacket",83,63,43,"warm"],["check",135,42,25]]
       },
       "hold on": {
-        caption: "先让对方稍等，自己去查一下。",
-        before: [["person",44,70,45],["person",137,70,45],["speech",93,40,39]],
-        after: [["hand",55,63,49,"warm"],["clock",122,60,49]]
+        before: [["reach-rope",88,57,81]],
+        after: [["grip-rope",76,57,81],["clock",144,51,34]]
       },
       "come in": {
-        caption: "从门外走进屋里。",
-        before: [["door",89,60,69],["person",49,70,43,"warm"]],
-        after: [["door",89,60,69],["person",132,68,43,"warm"]]
+        before: [["entryway",90,63,143],["person",46,72,43,"warm"]],
+        after: [["entryway",90,63,143],["person",132,72,43,"warm"]]
       },
       "fit in": {
-        caption: "新同学从独处到融入朋友圈。",
-        before: [["person",42,67,44,"warm"],["team",121,62,66]],
-        after: [["person",50,68,40],["person",90,68,44,"warm"],["person",130,68,40],["speech",90,28,29]]
+        before: [["person",43,68,44,"warm"],["person",112,68,40],["person",143,68,40],["speech",128,28,35]],
+        after: [["person",50,68,40],["person",90,68,44,"warm"],["person",130,68,40],["speech",90,28,35]]
       },
       "jump over": {
-        caption: "狗从围栏上方一跃而过。",
         before: [["fence",101,69,58],["dog",47,80,49,"warm"]],
         after: [["fence",89,77,58],["dog",111,33,51,"warm"],["arrow-right",151,38,23]]
       },
       "get over": {
-        caption: "感冒时卧床休息，后来恢复了。",
-        before: [["bed",66,66,73,"muted"],["thermometer",130,50,40,"warm"]],
-        after: [["person",73,62,64],["heart",121,66,32,"warm"],["check",133,36,26]]
+        before: [["hill",90,76,66],["person",42,72,46,"warm"],["thermometer",43,32,29,"warm"]],
+        after: [["hill",90,76,66],["arrow-over",89,47,76],["person",139,72,46,"warm"],["heart",140,32,28]]
       },
       "turn down": {
-        caption: "把音乐音量从大调到小。",
-        before: [["speaker",57,61,61,"warm"],["slider",128,40,41,"warm"]],
-        after: [["speaker",57,61,47],["arrow-down",128,35,23],["slider",128,78,41]]
+        before: [["speaker",57,59,56,"warm"],["slider",126,58,55,"warm"]],
+        after: [["speaker",57,59,56],["slider",126,58,55],["arrow-down",151,60,25]]
       },
       "calm down": {
-        caption: "先缓一口气，情绪慢慢平静下来。",
-        before: [["person",75,66,60,"warm"],["warning",127,42,36,"warm"]],
-        after: [["person",75,66,60],["heart",127,42,35]]
+        before: [["tense-face",62,59,62,"warm"],["slider",132,57,52,"warm"]],
+        after: [["calm-face",62,59,62],["slider",132,57,52],["arrow-down",154,57,23]]
       },
     };
 
@@ -3024,6 +2999,342 @@
           rect(-13, -5, 11, 9, 4, paper);
           shape([[20, 11], [20, 20]], null);
           break;
+        case 'task-hook': {
+          const removed = tone === 'warm';
+          shape([[-23, 22], [23, 22]], null, '#a3bbc2');
+          rect(-21, 12, 14, 9, 1.5, wood);
+          rect(-21, 3, 14, 9, 1.5, '#f5d3a8');
+          rect(-19, -22, 41, 4, 1, '#d4e3e6', '#8ca8b0');
+          shape([[5, -21], [5, -14], [10, -14], [10, -17]], null);
+          const cardX = removed ? 0 : 1;
+          const cardY = removed ? -3 : -12;
+          if (removed) {
+            shape([[6, -12], [6, -7]], null, accent);
+            shape([[4, -8], [6, -6], [8, -8]], null, accent);
+          }
+          rect(cardX, cardY, 17, 15, 2, paper, accent);
+          circle(cardX + 8, cardY + 2.6, 1.4, paper, accent);
+          if (!removed) shape([[8, -14], [9, -10]], null);
+          shape([[cardX + 4, cardY + 6], [cardX + 12, cardY + 6]], null, accent);
+          shape([[cardX + 4, cardY + 10], [cardX + 10, cardY + 10]], null, accent);
+          shape([[-9, 22], [-7, 19], [-6, 16], [removed ? 8 : -1, removed ? 9 : 0], [removed ? 16 : 2, removed ? 8 : -2], [removed ? 17 : 2, removed ? 11 : 1], [removed ? 10 : 1, removed ? 13 : 4], [-2, 20], [-2, 22]], skin);
+          break;
+        }
+        case 'event-card':
+          rect(-20, -13, 40, 26, 3, '#ffe5bf', '#ad7444');
+          circle(-7, -2, 3.6, '#ad7444', null);
+          circle(7, -2, 3.6, '#ad7444', null);
+          shape([[-12, 6], [-7, 3], [-2, 6]], null, '#ad7444');
+          shape([[2, 6], [7, 3], [12, 6]], null, '#ad7444');
+          break;
+        case 'brush-shoulder': {
+          const cleared = tone === 'warm';
+          shape([[-22, 20], [-20, 6], [-10, 1], [0, 2], [11, 7], [17, 20]], '#9bced6');
+          circle(-8, -8, 8, skin);
+          circle(-5, -8, 0.9, ink, null);
+          shape([[15, 16], [7, 11], [4, 8], [5, 6], [8, 7], [13, 8], [17, 7], [20, 8], [21, 12]], skin);
+          const specks = cleared ? [[10, -9], [16, -13], [21, -6]] : [[3, 3], [7, 2], [8, 5]];
+          specks.forEach(([dx, dy], i) => circle(dx, dy, i === 1 ? 1.8 : 1.3, '#886344', null));
+          if (cleared) {
+            shape([[6, 2], [12, 0], [17, -4]], null, accent);
+            shape([[13, -4], [17, -4], [16, 0]], null, accent);
+          }
+          break;
+        }
+        case 'nod-head': {
+          const asleep = tone === 'warm';
+          shape([[-11, 20], [-11, 4], [-5, -1], [5, -1], [11, 4], [11, 20]], '#ade0e5');
+          ctx.save();
+          if (asleep) {
+            ctx.translate(5, 1);
+            ctx.rotate(Math.PI / 5);
+          }
+          circle(0, -8, 10, skin);
+          if (asleep) {
+            shape([[2, -9], [4, -8], [6, -9]], null);
+            shape([[7, -17], [11, -14]], null, accent);
+          } else {
+            circle(4, -9, 1.3, ink, null);
+          }
+          shape([[3, -4], [5, -4]], null);
+          ctx.restore();
+          if (asleep) {
+            shape([[14, -13], [19, -8], [20, -3]], null, accent);
+            shape([[17, -5], [20, -3], [22, -6]], null, accent);
+          }
+          break;
+        }
+        case 'untangle-thread': {
+          const straight = tone === 'warm';
+          ctx.beginPath();
+          ctx.moveTo(-22, 6);
+          if (straight) {
+            ctx.bezierCurveTo(-11, 3, 2, 1, 15, -2);
+          } else {
+            ctx.bezierCurveTo(-14, 9, 3, 11, 5, 1);
+            ctx.bezierCurveTo(10, -17, -23, -14, -13, -3);
+            ctx.bezierCurveTo(-4, 9, 10, -10, -1, -13);
+            ctx.bezierCurveTo(-15, -18, -8, 14, 8, 9);
+            ctx.bezierCurveTo(16, 4, 10, -8, 3, -4);
+            ctx.bezierCurveTo(-3, 0, 8, 5, 15, -2);
+          }
+          ctx.lineWidth = 2.45;
+          ctx.strokeStyle = '#b66746';
+          ctx.stroke();
+          ctx.lineWidth = 1.8;
+          shape([[24, -8], [21, -8], [16, -4], [13, -4], [12, -2], [16, 1], [21, 0], [24, 4]], skin);
+          if (straight) {
+            shape([[5, -9], [11, -10]], null, accent);
+            shape([[8, -12], [11, -10], [9, -7]], null, accent);
+          }
+          break;
+        }
+        case 'open-stock': {
+          const empty = tone === 'warm';
+          shape([[-21, -4], [18, -4], [22, 8], [-21, 8]], '#b78461');
+          shape([[-21, -4], [-16, -12], [23, -12], [18, -4]], '#f2cc9f');
+          if (!empty) {
+            rect(-16, -10, 10, 19, 2, light);
+            rect(-4, -7, 11, 16, 2, '#f6d0a2');
+            rect(9, -10, 10, 19, 2, '#b2d7be');
+          }
+          shape([[-21, 6], [22, 6], [20, 20], [-19, 20]], '#e4b589');
+          rect(-7, 11, 14, 4, 1, '#b78461', null);
+          break;
+        }
+        case 'gold-pan': {
+          const washed = tone === 'warm';
+          ctx.save();
+          if (washed) ctx.rotate(Math.PI / 10);
+          shape([[-23, -3], [-14, 15], [17, 15], [23, -3]], '#527f73', ink);
+          rect(-23, -5, 46, 7, 3.5, '#75a799', ink);
+          if (washed) {
+            shape([[-12, -5], [-9, -11], [-4, -8], [-5, -4]], '#ffd36a', '#a56e25');
+            shape([[-3, -6], [0, -10], [5, -7], [4, -4]], '#ffdf8a', '#a56e25');
+            shape([[22, -2], [26, 2], [27, 7]], null, '#61a2b9');
+          } else {
+            rect(-18, -5, 37, 6, 3, '#80b7c4', null);
+            circle(-10, -5, 3.5, '#a39272', '#786a51');
+            circle(0, -4, 3, '#d1a476', '#786a51');
+            circle(9, -5, 4, '#a39272', '#786a51');
+          }
+          ctx.restore();
+          if (washed) {
+            shape([[-12, -12], [-14, -16]], null, '#b07c39');
+            shape([[-4, -14], [-4, -18]], null, '#b07c39');
+          }
+          break;
+        }
+        case 'story-flow': {
+          const complete = tone === 'warm';
+          const width = complete ? 44 : 24;
+          shape([[-17, 2], [-19, 10], [-9, 5]], paper, accent);
+          rect(-23, -7, width, 13, 6, paper, accent);
+          const dots = complete ? [-17, -9, -1, 7, 15] : [-17, -9];
+          dots.forEach((dot, i) => circle(dot, -0.5, 1.65, i % 2 ? '#8bb5c0' : accent, null));
+          break;
+        }
+        case 'route-steps-start':
+        case 'route-steps-finish': {
+          const finished = icon === 'route-steps-finish';
+          const route = [[-21, 12], [-9, 12], [-9, 2], [5, 2], [5, -8], [20, -8]];
+          ctx.save();
+          ctx.lineWidth = 2.6;
+          if (!finished) ctx.setLineDash([2.7, 3.1]);
+          shape(route, null, finished ? positive : '#82a5b0');
+          ctx.restore();
+          circle(-21, 12, 3.3, accent);
+          circle(-9, 2, 3.3, finished ? light : paper);
+          circle(5, -8, 3.3, finished ? light : paper);
+          circle(20, -8, 3.3, finished ? positive : paper);
+          shape([[20, -8], [20, -20], [9, -19], [20, -15]], finished ? '#e8bb75' : '#e4eef0');
+          break;
+        }
+        case 'deal-platform':
+          rect(-24, -3, 48, 9, 2.4, wood);
+          shape([[-18, 6], [-18, 12]], null);
+          shape([[18, 6], [18, 12]], null);
+          break;
+        case 'deal-crack':
+          shape([[-24, -3], [-7, -3], [-10, 0], [-6, 4], [-9, 8], [-24, 6]], wood);
+          shape([[24, -3], [6, -3], [9, 0], [6, 5], [10, 8], [24, 6]], wood);
+          shape([[-18, 6], [-18, 12]], null);
+          shape([[18, 6], [18, 12]], null);
+          shape([[-3, -9], [-1, -12]], null, alert);
+          shape([[3, -9], [5, -11]], null, alert);
+          circle(-5, 11, 1.2, wood, null);
+          circle(4, 9, 1.1, wood, null);
+          break;
+        case 'golfer-ready':
+        case 'golfer-finish': {
+          const finished = icon === 'golfer-finish';
+          rect(-24, 21, 47, 2, 1, '#b3d4be', null);
+          ctx.save();
+          ctx.lineWidth = 3.2;
+          if (finished) {
+            shape([[-7, 6], [-2, 12], [-2, 20], [1, 20]], null);
+            shape([[-11, 7], [-13, 13], [-19, 18]], null);
+          } else {
+            shape([[-6, 7], [-1, 13], [0, 20], [3, 20]], null);
+            shape([[-10, 8], [-14, 15], [-15, 20], [-12, 20]], null);
+          }
+          ctx.restore();
+          if (finished) {
+            shape([[-15, -6], [-8, -9], [-2, 0], [-6, 10], [-15, 8]], light);
+            shape([[-12, -4], [-5, -8], [-8, -15], [-4, -18], [0, -9], [-4, -3], [-11, 1]], light);
+            shape([[-5, -18], [-22, -14], [-23, -10]], null);
+            circle(-5, -17, 2.2, skin);
+            ctx.beginPath();
+            ctx.moveTo(7, 16);
+            ctx.quadraticCurveTo(4, -2, 17, -12);
+            ctx.setLineDash([2.3, 3.5]);
+            ctx.strokeStyle = wood;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            circle(18, -14, 2, paper);
+          } else {
+            shape([[-15, -5], [-9, -10], [-1, -4], [-4, 3], [-6, 10], [-15, 7]], light);
+            shape([[-8, -5], [0, 1], [4, 5], [1, 8], [-5, 5], [-11, -1]], light);
+            shape([[4, 6], [11, 19], [15, 19]], null);
+            circle(4, 6, 2.3, skin);
+            circle(18, 19, 2, paper);
+          }
+          circle(-4, -13, 5.2, skin);
+          shape([[-9, -15], [-8, -19], [-1, -19], [1, -15], [4, -15], [-9, -15]], accent);
+          break;
+        }
+        case 'crisis-tunnel':
+          shape([[-24, 18], [-20, 5], [-12, -13], [-4, -17], [6, -16], [16, -7], [23, 18]], '#9ebac0');
+          rect(-16, -2, 32, 21, [9, 9, 0, 0], '#537581');
+          rect(-10, 4, 20, 14, [6, 6, 0, 0], ink);
+          shape([[-24, 19], [24, 19]], null, '#567b86');
+          shape([[-18, 14], [-13, 14]], null, '#c7dde0');
+          shape([[13, 14], [19, 14]], null, '#c7dde0');
+          break;
+        case 'topic-waterline': {
+          const shore = [[-25, -3], [-19, -5], [-11, -2], [-4, -5], [4, -2], [12, -5], [19, -2], [25, -4]];
+          shape([...shore, [25, 15], [-25, 15]], '#c9e8ee', '#91c7d2');
+          shape([[-23, 7], [-17, 9], [-11, 7]], null, '#7ab8c6');
+          shape([[13, 7], [18, 9], [23, 7]], null, '#7ab8c6');
+          break;
+        }
+        case 'topic-table':
+          rect(-23, -5, 46, 6, 1.8, '#e6bc90');
+          rect(-19, 1, 4, 13, 1, wood);
+          rect(15, 1, 4, 13, 1, wood);
+          break;
+        case 'topic-card':
+          rect(-20, -15, 40, 29, 4, paper);
+          shape([[-13, -7], [13, -7], [13, 4], [-3, 4], [-8, 9], [-8, 4], [-13, 4]], light, accent);
+          for (const x of [-6, 0, 6]) circle(x, -1.3, 1.2, accent, null);
+          break;
+        case 'packing-open':
+        case 'packing-closed': {
+          const closed = icon === 'packing-closed';
+          if (closed) {
+            shape([[-20, -5], [0, -15], [20, -5], [0, 4]], '#f5d6ad');
+            shape([[-5, -12.5], [0, -15], [20, -5], [15, -2.5]], '#b77c41');
+          } else {
+            shape([[-20, -5], [0, -15], [20, -5], [0, 4]], '#a66c43');
+            shape([[-20, -5], [-24, -13], [-4, -22], [0, -15]], '#f5d6ad');
+            shape([[0, -15], [5, -22], [24, -13], [20, -5]], '#f5d6ad');
+            rect(-12, -12, 10, 12, 2, light, accent);
+            rect(2, -17, 11, 12, 2, paper);
+            circle(-1, 2, 4, '#e9b463');
+          }
+          shape([[-20, -5], [0, 4], [0, 21], [-20, 13]], wood);
+          shape([[0, 4], [20, -5], [20, 13], [0, 21]], '#e6bc90');
+          if (closed) shape([[15, -2.5], [20, -5], [20, 5], [15, 7.5]], '#b77c41');
+          break;
+        }
+        case 'emotion-bottle-open':
+        case 'emotion-bottle-closed': {
+          const closed = icon === 'emotion-bottle-closed';
+          shape([[-6, -17], [-6, -10], [-13, -6], [-15, 0], [-15, 19], [15, 19], [15, 0], [13, -6], [6, -10], [6, -17]], '#d4ebe7', '#528a87');
+          shape([[-10, 1], [-10, 14]], null, paper);
+          if (closed) rect(-8, -22, 16, 6, 2, wood);
+          else {
+            shape([[-6, -17], [6, -17]], null, accent);
+            rect(11, 12, 9, 6, 1.5, wood);
+          }
+          break;
+        }
+        case 'pent-emotion':
+          circle(0, 0, 19, '#f8ccb1', alert);
+          circle(-6, -2, 1.9, ink, null);
+          circle(6, -2, 1.9, ink, null);
+          shape([[-9, -8], [-4, -6]], null, alert);
+          shape([[9, -8], [4, -6]], null, alert);
+          ctx.beginPath();
+          ctx.moveTo(-7, 8);
+          ctx.quadraticCurveTo(0, 2, 7, 8);
+          ctx.strokeStyle = alert;
+          ctx.stroke();
+          break;
+        case 'hand-raised':
+          shape([[-12, 2], [-19, -8], [-20, -17], [-15, -18], [-13, -9], [-7, -4]], light, accent);
+          circle(-18, -20, 3.7, skin);
+          rect(-11, -2, 22, 19, 5, light, accent);
+          circle(1, -11, 7.5, skin);
+          circle(4, -11, 1, ink, null);
+          shape([[-7, 18], [-7, 22], [-12, 22]], null);
+          shape([[7, 18], [7, 22], [12, 22]], null);
+          break;
+        case 'reach-rope':
+        case 'grip-rope': {
+          // The rope stays fixed while the hand closes around it.
+          const grip = icon === 'grip-rope';
+          rect(8, -24, 7, 48, 3, '#c59469');
+          for (const y of [-19, -11, -3, 5, 13, 21]) {
+            shape([[8, y], [15, y - 3]], null, '#87583c');
+          }
+          if (grip) {
+            shape([[-25, 4], [-10, 2], [-6, -8], [-1, -12], [6, -11], [12, -8], [13, 9], [9, 14], [-10, 16], [-25, 17]], skin);
+            [0, 4, 8].forEach(y => shape([[5, y - 5], [12, y - 4]], null, '#a36343'));
+            shape([[-6, -3], [-3, -9], [3, -11], [7, -6], [3, 2]], null, '#a36343');
+          } else {
+            shape([[-25, 6], [-14, 3], [-7, -8], [-4, -11], [0, -10], [2, -7], [-4, -1], [1, -3], [5, -2], [5, 2], [0, 4], [4, 4], [5, 7], [0, 12], [-11, 17], [-25, 18]], skin);
+          }
+          break;
+        }
+        case 'entryway': {
+          // A small cutaway shows the room on the right and the footpath at the left.
+          rect(2, -11, 19, 20, 1, '#e5e3cc', '#628292');
+          shape([[2, -11], [11, -20], [22, -12]], '#f0c99f', '#628292');
+          rect(1, -6, 5, 15, 0, wood, '#628292');
+          rect(12, -8, 6, 5, 1, '#a6dce3', '#628292');
+          shape([[-22, 9], [3, 9]], null, '#97b5bd');
+          shape([[2, 9], [21, 9]], null, '#b28b60');
+          break;
+        }
+        case 'arrow-over': {
+          ctx.beginPath();
+          ctx.moveTo(-21, 9);
+          ctx.quadraticCurveTo(1, -26, 21, 8);
+          ctx.strokeStyle = accent;
+          ctx.stroke();
+          shape([[14, 6], [21, 8], [21, 1]], null, accent);
+          break;
+        }
+        case 'tense-face':
+        case 'calm-face': {
+          const tense = icon === 'tense-face';
+          circle(0, 0, 18, tense ? '#f7cd9f' : '#e0eee1', tense ? accent : positive);
+          if (tense) {
+            shape([[-11, -8], [-4, -4]], null);
+            shape([[11, -8], [4, -4]], null);
+            circle(-6, -1, 1.5, ink, null);
+            circle(6, -1, 1.5, ink, null);
+            shape([[-6, 10], [-2, 7], [2, 7], [6, 10]], null);
+            shape([[-22, -11], [-26, -15]], null, alert);
+            shape([[22, -11], [26, -15]], null, alert);
+          } else {
+            shape([[-10, -3], [-7, -5], [-4, -3]], null);
+            shape([[10, -3], [7, -5], [4, -3]], null);
+            shape([[-7, 5], [-3, 8], [3, 8], [7, 5]], null, positive);
+          }
+          break;
+        }
         case 'arrow-right':
         case 'arrow-up':
         case 'arrow-down':
@@ -3048,6 +3359,9 @@
         ctx.fillRect(offset, 91, 180, 17);
         ctx.save();
         ctx.translate(offset, 0);
+        ctx.beginPath();
+        ctx.rect(0, 4, 180, 104);
+        ctx.clip();
         elements.forEach(icon => drawPhraseIcon(ctx, ...icon));
         ctx.restore();
       }
@@ -3084,8 +3398,9 @@
                   <strong class="text-base">${escHtml(it.phrase)}</strong>
                   <button onclick="speakEnc('${safeEnc(it.phrase)}', 0.95)" class="shrink-0 text-xs px-2.5 py-1 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)]">🔊 读短语</button>
                 </div>
-                ${art ? `<figure class="phrase-art"><canvas width="800" height="224" aria-hidden="true" data-phrase-art="${index}"></canvas><figcaption>${escHtml(art.caption)}</figcaption></figure>` : ''}
-                <p class="text-sm text-[var(--muted-foreground)]">${escHtml(it.scene)}</p>
+                ${art
+                  ? `<figure class="phrase-art"><canvas width="800" height="224" aria-hidden="true" data-phrase-art="${index}"></canvas><figcaption>${escHtml(it.scene)}</figcaption></figure>`
+                  : `<p class="text-sm text-[var(--muted-foreground)]">${escHtml(it.scene)}</p>`}
                 <div class="pt-2 border-t border-[var(--border)] space-y-1 text-sm">
                   <div class="flex items-start justify-between gap-2">
                     <span class="font-medium">${escHtml(it.exEn)}</span>
