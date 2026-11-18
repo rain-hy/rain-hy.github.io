@@ -475,7 +475,7 @@
       {
         key: 'THROUGH',
         core: '从一端刺入、经历阻碍、完整穿透到另一端',
-        picture: { scene: 'tunnel', captions: ['小车在隧道入口', '小车穿过隧道，从另一端出来'] },
+        picture: { scene: 'tunnel', captions: ['小车来到左侧入口', '穿过整段隧道，从右侧驶出'] },
         items: [
           { phrase: 'walk me through it', scene: '带着我从头到尾“走穿”一遍流程细节（完胜 explain）', exEn: 'Could you walk me through how the new pricing works?', exZh: '你能带我从头捋一遍这套新定价是怎么运作的吗？' },
           { phrase: 'fall through', scene: '原本托住交易的地板破洞，整件事“漏下去泡汤了”', exEn: 'Our house purchase fell through at the very last minute.', exZh: '我们买房那事儿在最后一刻泡汤黄了。' },
@@ -2719,19 +2719,35 @@
           rounded(97, 120, 24, 12, 2, '#f8e1bf');
           break;
         case 'tunnel': {
+          const entrance = 88;
+          const exit = 232;
           rounded(21, 129, 278, 14, 5, '#8fabb8', navy);
+          rounded(entrance, 100, exit - entrance, 29, 0, '#496477');
+
+          // Side cutaway: the road runs under the mountain from left to right.
           ctx.beginPath();
-          ctx.moveTo(85, 128);
-          ctx.quadraticCurveTo(110, 44, 161, 41);
-          ctx.quadraticCurveTo(217, 47, 235, 128);
+          ctx.moveTo(entrance, 101);
+          ctx.quadraticCurveTo(117, 49, 161, 41);
+          ctx.quadraticCurveTo(200, 48, exit, 101);
           ctx.closePath();
           ctx.fillStyle = '#9ab5bd';
           ctx.fill();
           ctx.strokeStyle = navy;
           ctx.stroke();
-          rounded(115, 80, 90, 53, [28, 28, 0, 0], '#496477', navy);
-          rounded(130, 91, 60, 42, [18, 18, 0, 0], '#2e4857');
-          line([[21, 136], [299, 136]], '#d8ecef');
+
+          rounded(entrance, 100, exit - entrance, 4, 0, '#355465');
+          for (const lightX of [107, 143, 179, 215]) rounded(lightX, 104, 8, 2, 1, '#fbe9a7');
+          ctx.setLineDash([5, 5]);
+          line([[26, 136], [294, 136]], '#ffefb3');
+          ctx.setLineDash([]);
+          if (moved) line([[218, 114], [225, 118], [218, 122]], '#d3f3fa');
+
+          ctx.fillStyle = navy;
+          ctx.font = '600 11px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('入口', entrance - 16, 94);
+          ctx.fillText('出口', exit + 16, 94);
+
           const x = moved ? 246 : 38;
           rounded(x + 7, 107, 26, 19, 6, aqua, blue);
           rounded(x, 117, 41, 13, 5, '#269cb2', blue);
